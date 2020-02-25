@@ -14,7 +14,7 @@ router.post("",checkAuth,function (req, res, next) {
     ProductControllerInst.Add(req, res, next);
 } );
 router.put("/:id",checkAuth,function (req, res, next) {
-    ProductControllerInst.Update(req, res, next);
+    ProductControllerInst.UpdateProduct(req, res, next);
 } );
 
 router.delete("/:id",checkAuth,function (req, res, next) {

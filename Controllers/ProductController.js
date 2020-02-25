@@ -47,7 +47,7 @@ class ProduitController {
 
     }
 
-    Update(req, res, next) {
+    UpdateProduct(req, res, next) {
 
         Model.Produit.update(
             {

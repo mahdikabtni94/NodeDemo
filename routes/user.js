@@ -24,6 +24,9 @@ router.get("/findUser/:id", function (req, res, next) {
 router.put("/updateUser/:id", function (req, res, next) {
     userControllerInst.update(req, res, next);
 });
+router.get("/confirmation/:token", function (req, res, next) {
+    userControllerInst.confirmUserAccount(req, res, next);
+});
 
 
 module.exports = router;

@@ -15,6 +15,7 @@ class UserController extends BaseApiController {
 
 
     adduser(req, res, next) {
+
         const password = JSON.parse(JSON.stringify({pass: "marabout"}));
         console.log(password.pass);
         console.log("error", req.body);
@@ -34,7 +35,7 @@ class UserController extends BaseApiController {
 
             user.save().then(result => {
                 const emailtoken = jwt.sign(
-                    {userId: result.user_id},
+                    {user_id: result.user_id},
                     "secret_this_should_be_longer",
                     {expiresIn: "1h"}
                 );
@@ -124,6 +125,27 @@ class UserController extends BaseApiController {
                 });
             });
     }
+
+    confirmUserAccount(req, res, next) {
+        const EMAIL_SECRET = "secret_this_should_be_longer";
+        const decodeToken = jwt.verify(req.params.token, EMAIL_SECRET);
+        console.log(decodeToken.user_id);
+        const where = {}
+        where[this.getModelPrimaryKey()] = decodeToken.user_id;
+        try {
+            Model.User.update(
+                {Activated: true},
+                {where: where}
+            )
+        } catch (e) {
+            res.send(e);
+
+        }
+        return res.redirect('http://localhost:4200');
+
+
+    }
+
 
 }
 
