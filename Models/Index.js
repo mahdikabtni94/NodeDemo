@@ -6,6 +6,7 @@ const Product = require("./Products");
 const Category = require("./Category");
 
 
+
 const sequelize = new Sequelize(config.database, config.user, config.password, {
     host: config.host,
     dialect: 'postgres',
@@ -48,6 +49,7 @@ module.exports = {
     Article: Article,
     Produit: produit,
     Category: category,
+
 };
 
 

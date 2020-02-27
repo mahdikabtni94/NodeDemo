@@ -27,6 +27,18 @@ router.put("/updateUser/:id", function (req, res, next) {
 router.get("/confirmation/:token", function (req, res, next) {
     userControllerInst.confirmUserAccount(req, res, next);
 });
+router.put("/resetPassword/:token", function (req, res, next) {
+    userControllerInst.resetPassword(req, res, next);
+});
+router.post("/forgetPassword", function (req, res, next) {
+    userControllerInst.ResetEmail(req, res, next);
+});
+router.get("/activateUser/:id", function (req, res, next) {
+    userControllerInst.ActivateUser(req, res, next);
+});
+router.get("/deactivateUser/:id", function (req, res, next) {
+    userControllerInst.DeactivateUser(req, res, next);
+});
 
 
 module.exports = router;
