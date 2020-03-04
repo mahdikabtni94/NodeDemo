@@ -1,18 +1,18 @@
 
-module.exports = (sequelize, type) => {
-   const Article =  sequelize.define('article', {
+module.exports = function (sequelize, DataTypes) {
+   var Article =  sequelize.define('articles', {
         article_id: {
-            type: type.INTEGER,
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
         label: {
-            type : type.STRING,
+            type : DataTypes.STRING,
             allowNull : false,
 
         },
         description :{
-            type : type.STRING,
+            type : DataTypes.STRING,
             allowNull:  true,
 
 

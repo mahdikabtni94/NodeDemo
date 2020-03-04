@@ -9,8 +9,8 @@ router.post("/signup", function (req, res, next) {
     userControllerInst.adduser(req, res, next);
 });
 
-router.post("/login", function (req, res, next) {
-    userControllerInst.loginUser(req, res, next);
+router.post("/login",function (req, res, next) {
+    userControllerInst.loginuser(req, res, next);
 });
 router.delete("/deleteUser/:id", function (req, res, next) {
     userControllerInst.delete(req, res, next);
@@ -25,7 +25,7 @@ router.put("/updateUser/:id", function (req, res, next) {
     userControllerInst.update(req, res, next);
 });
 router.get("/confirmation/:token", function (req, res, next) {
-    userControllerInst.confirmUserAccount(req, res, next);
+    userControllerInst.confirmuserAccount(req, res, next);
 });
 router.put("/resetPassword/:token", function (req, res, next) {
     userControllerInst.resetPassword(req, res, next);
@@ -34,10 +34,10 @@ router.post("/forgetPassword", function (req, res, next) {
     userControllerInst.ResetEmail(req, res, next);
 });
 router.get("/activateUser/:id", function (req, res, next) {
-    userControllerInst.ActivateUser(req, res, next);
+    userControllerInst.Activateuser(req, res, next);
 });
 router.get("/deactivateUser/:id", function (req, res, next) {
-    userControllerInst.DeactivateUser(req, res, next);
+    userControllerInst.Deactivateuser(req, res, next);
 });
 
 

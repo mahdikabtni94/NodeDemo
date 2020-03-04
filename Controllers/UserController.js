@@ -1,17 +1,17 @@
 const {Op} = require("sequelize");
 const bcrypt = require('bcrypt');
-const Model = require('../Models/Index');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const BaseApiController = require('./BaseApiController');
 const EmailPassword = 'farfour33';
 const Email = 'mahdi.kabtni@esprit.tn';
+let db = require('../models');
 
-class UserController extends BaseApiController {
+class userController  extends  BaseApiController{
 
     constructor() {
-        super();
-        this.baseModel = Model.User
+        super('user');
+        this.baseModel ='user';
 
     }
 
@@ -22,18 +22,17 @@ class UserController extends BaseApiController {
         console.log("error", req.body);
         bcrypt.hash(password.pass, 10).then(hash => {
 
-            const user = new Model.User({
-                email: req.body.email,
-                password: hash,
-                Username: req.body.Username,
-                Name: req.body.Name,
-                Address: req.body.Address,
-                Phone: req.body.Phone,
-                City: req.body.City,
-                Profile: req.body.Profile,
-                Activated: false
-            });
+             const user =db.user.build();
 
+                user.email = req.body.email;
+                user.password=hash;
+                user.Username= req.body.Username;
+                user.Name= req.body.Name;
+                user.Address =req.body.Address;
+                user.Phone= req.body.Phone;
+                user.City= req.body.City;
+                user.Profile= req.body.Profile;
+                user.Activated= false;
             user.save().then(result => {
                 const emailtoken = jwt.sign(
                     {user_id: result.user_id},
@@ -54,7 +53,7 @@ class UserController extends BaseApiController {
                     html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
                 });
                 res.status(201).json({
-                    message: 'User Added Successfully!!',
+                    message: 'user Added Successfully!!',
                     user: {
                         result: result,
                         id: result.user_id,
@@ -75,9 +74,9 @@ class UserController extends BaseApiController {
         });
     }
 
-    loginUser(req, res, next) {
+    loginuser(req, res, next) {
 
-        let fetchedUser;
+        let fetcheduser;
         if (!req.body.email || !req.body.password) {
             return res.status(401).json({
                 message: "No params sended"
@@ -85,7 +84,7 @@ class UserController extends BaseApiController {
         }
 
 
-        Model.User.findOne({
+        db.user.findOne({
             where: {
                 [Op.or]: [
 
@@ -100,7 +99,7 @@ class UserController extends BaseApiController {
                         message: "Auth failed"
                     });
                 }
-                fetchedUser = user;
+                fetcheduser = user;
                 const validPassword = bcrypt.compareSync(req.body.password, user.password);
                 if (!validPassword) {
                     return res.status(401).json({
@@ -108,7 +107,7 @@ class UserController extends BaseApiController {
                     });
                 } else {
                     const token = jwt.sign(
-                        {email: fetchedUser.email, userId: fetchedUser.user_id},
+                        {email: fetcheduser.email, userId: fetcheduser.user_id},
                         "secret_this_should_be_longer",
                         {expiresIn: "1h"}
                     );
@@ -127,7 +126,7 @@ class UserController extends BaseApiController {
             });
     }
 
-    confirmUserAccount(req, res, next) {
+    confirmuserAccount(req, res, next) {
         const EMAIL_SECRET = "secret_this_should_be_longer";
         const decodeToken = jwt.verify(req.params.token, EMAIL_SECRET);
         const token = req.params.token;
@@ -136,7 +135,7 @@ class UserController extends BaseApiController {
         const where = {}
         where[this.getModelPrimaryKey()] = decodeToken.user_id;
         try {
-            Model.User.update(
+            db.user.update(
                 {Activated: true},
                 {where: where}
             )
@@ -159,7 +158,7 @@ class UserController extends BaseApiController {
         where[this.getModelPrimaryKey()] = id;
         bcrypt.hash(req.body.password, 10).then(hash => {
             try {
-                Model.User.update(
+                db.user.update(
                     {password: hash},
                     {where: where}
                 )
@@ -179,13 +178,13 @@ class UserController extends BaseApiController {
 
     ResetEmail(req, res, next) {
         const EMAIL_SECRET = "secret_this_should_be_longer";
-        let fetchedUser;
+        let fetcheduser;
         if (!req.body.email) {
             return res.status(401).json({
                 message: "No params sended"
             });
         }
-        Model.User.findOne({
+        db.user.findOne({
             where: {
                 [Op.or]: [
 
@@ -196,12 +195,12 @@ class UserController extends BaseApiController {
         }).then(user => {
             if (!user) {
                 return res.status(401).json({
-                    message: "User Doesnt Exist"
+                    message: "user Doesnt Exist"
                 });
             }
-            fetchedUser = user;
+            fetcheduser = user;
             const token = jwt.sign(
-                {user_id: fetchedUser.user_id},
+                {user_id: fetcheduser.user_id},
                 EMAIL_SECRET,
                 {expiresIn: "1h"}
             );
@@ -235,11 +234,11 @@ class UserController extends BaseApiController {
 
     }
 
-    ActivateUser(req, res, next) {
+    Activateuser(req, res, next) {
         const where = {};
         where[this.getModelPrimaryKey()] = req.params.id;
         try {
-            Model.User.update(
+            db.user.update(
                 {Activated: true},
                 {where: where}
             )
@@ -254,11 +253,11 @@ class UserController extends BaseApiController {
 
     }
 
-    DeactivateUser(req, res, next) {
+    Deactivateuser(req, res, next) {
         const where = {};
         where[this.getModelPrimaryKey()] = req.params.id;
         try {
-            Model.User.update(
+            db.user.update(
                 {Activated: false},
                 {where: where}
             )
@@ -276,4 +275,4 @@ class UserController extends BaseApiController {
 
 }
 
-module.exports = UserController;
+module.exports = userController;

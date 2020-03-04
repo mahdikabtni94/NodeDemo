@@ -1,56 +1,56 @@
-module.exports = (sequelize, type) => {
-    return sequelize.define('user', {
+module.exports = function (sequelize, DataTypes){
+    var user = sequelize.define('user', {
             user_id: {
-                type: type.INTEGER,
+                type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true
             },
             email: {
-                type: type.STRING,
+                type: DataTypes.STRING,
                 allowNull: false,
                 unique: true,
 
             },
             password: {
-                type: type.STRING,
+                type: DataTypes.STRING,
                 allowNull: false,
-                unique: true,
+
 
             },
             Name: {
-                type: type.STRING
+                type: DataTypes.STRING
             },
             Username: {
-                type: type.STRING,
+                type: DataTypes.STRING,
                 allowNull: false,
                 unique : true,
 
 
             },
             Phone: {
-                type: type.STRING,
+                type: DataTypes.STRING,
                 allowNull:true
 
             },
             Address: {
-                type: type.STRING,
+                type: DataTypes.STRING,
 
 
             },
             City: {
-                type: type.STRING,
+                type: DataTypes.STRING,
             },
             Profile: {
-                type: type.STRING,
+                type: DataTypes.STRING,
 
             },
             Activated: {
-                type: type.BOOLEAN,
+                type: DataTypes.BOOLEAN,
                 defaultValue: '0'
             }
         },
         {
             tableName: 'Users'
-        })
-
+        });
+return user
 };
