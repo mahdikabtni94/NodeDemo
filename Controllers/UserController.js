@@ -7,11 +7,11 @@ const EmailPassword = 'farfour33';
 const Email = 'mahdi.kabtni@esprit.tn';
 let db = require('../models');
 
-class userController  extends  BaseApiController{
+class userController extends BaseApiController {
 
     constructor() {
         super('user');
-        this.baseModel ='user';
+        this.baseModel = 'user';
 
     }
 
@@ -22,17 +22,16 @@ class userController  extends  BaseApiController{
         console.log("error", req.body);
         bcrypt.hash(password.pass, 10).then(hash => {
 
-             const user =db.user.build();
-
-                user.email = req.body.email;
-                user.password=hash;
-                user.Username= req.body.Username;
-                user.Name= req.body.Name;
-                user.Address =req.body.Address;
-                user.Phone= req.body.Phone;
-                user.City= req.body.City;
-                user.Profile= req.body.Profile;
-                user.Activated= false;
+            const user = db.user.build();
+            user.email = req.body.email;
+            user.password = hash;
+            user.Username = req.body.Username;
+            user.Name = req.body.Name;
+            user.Address = req.body.Address;
+            user.Phone = req.body.Phone;
+            user.City = req.body.City;
+            user.Profile = req.body.Profile;
+            user.Activated = false;
             user.save().then(result => {
                 const emailtoken = jwt.sign(
                     {user_id: result.user_id},
@@ -77,54 +76,101 @@ class userController  extends  BaseApiController{
     loginuser(req, res, next) {
 
         let fetcheduser;
-        if (!req.body.email || !req.body.password) {
+        if ((!req.body.email || !req.body.password) && (!req.body.Username)) {
             return res.status(401).json({
                 message: "No params sended"
             });
         }
 
+        if (req.body.email && req.body.password) {
+            db.user.findOne({
+                where: {
+                    [Op.or]: [
 
-        db.user.findOne({
-            where: {
-                [Op.or]: [
+                        {email: req.body.email}
+                    ],
 
-                    {email: req.body.email}
-                ],
+                }
+            })
+                .then(user => {
+                    if (!user) {
+                        return res.status(401).json({
+                            message: "Auth failed"
+                        });
+                    }
+                    fetcheduser = user;
+                    const validPassword = bcrypt.compareSync(req.body.password, user.password);
+                    if (!validPassword) {
+                        return res.status(401).json({
+                            message: "Wrong Password"
+                        });
+                    } else {
+                        const token = jwt.sign(
+                            {email: fetcheduser.email, userId: fetcheduser.user_id},
+                            "secret_this_should_be_longer",
+                            {expiresIn: "1h"}
+                        );
 
-            }
-        })
-            .then(user => {
-                if (!user) {
+
+                        return res.status(200).json({
+                            token: token,
+                            expiresIn: 3600
+                        });
+                    }
+                })
+                .catch(err => {
                     return res.status(401).json({
                         message: "Auth failed"
                     });
-                }
-                fetcheduser = user;
-                const validPassword = bcrypt.compareSync(req.body.password, user.password);
-                if (!validPassword) {
-                    return res.status(401).json({
-                        message: "Wrong Password"
-                    });
-                } else {
-                    const token = jwt.sign(
-                        {email: fetcheduser.email, userId: fetcheduser.user_id},
-                        "secret_this_should_be_longer",
-                        {expiresIn: "1h"}
-                    );
+                });
 
+        } else if (req.body.Username && req.body.password) {
+            db.user.findOne({
+                where: {
+                    [Op.or]: [
 
-                    return res.status(200).json({
-                        token: token,
-                        expiresIn: 3600
-                    });
+                        {Username: req.body.Username}
+                    ],
+
                 }
             })
-            .catch(err => {
-                return res.status(401).json({
-                    message: "Auth failed"
+                .then(user => {
+                    if (!user) {
+                        return res.status(401).json({
+                            message: "Auth failed"
+                        });
+                    }
+                    fetcheduser = user;
+                    const validPassword = bcrypt.compareSync(req.body.password, user.password);
+                    if (!validPassword) {
+                        return res.status(401).json({
+                            message: "Wrong Password"
+                        });
+                    } else {
+                        const token = jwt.sign(
+                            {email: fetcheduser.email, userId: fetcheduser.user_id},
+                            "secret_this_should_be_longer",
+                            {expiresIn: "1h"}
+                        );
+
+
+                        return res.status(200).json({
+                            token: token,
+                            expiresIn: 3600
+                        });
+                    }
+                })
+                .catch(err => {
+                    return res.status(401).json({
+                        message: "Auth failed"
+                    });
                 });
-            });
+
+        }
+
     }
+
+
 
     confirmuserAccount(req, res, next) {
         const EMAIL_SECRET = "secret_this_should_be_longer";

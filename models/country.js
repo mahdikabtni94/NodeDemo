@@ -17,18 +17,24 @@ module.exports = function (sequelize, DataTypes) {
         }
     );
     const customer = require('./customer');
+    const state = require('./state');
     country.prototype.modelIncludes = {
-        'customers': {
+        'customer': {
             model: customer
-        }
+        },
+        'state': {
+            model : state
+        },
+
     };
     country.prototype.getModelIncludes = function() {
-        return ['customers'];
+        return ['customer','state'];
     };
 
     country.associate = function (models) {
         // associations can be defined here
-        country.hasMany(models.customer);
+        country.hasMany(models.customer,{foreignKey: 'CountryId'});
+        country.hasMany(models.state,{foreignKey:'CountryId'});
     };
     return country;
 

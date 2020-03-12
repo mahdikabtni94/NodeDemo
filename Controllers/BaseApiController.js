@@ -24,16 +24,34 @@ class BaseApiController {
             })
         }
 
-        this.db[this.baseModel].findAll({
-            where: this.findWhere,
-            include: this.findInclude,
-        }).then(
-            resData => {
-                res.status(200).json({
-                    message: 'Global.GetDataWithSuccess',
-                    data: resData,
-                });
-            });
+        this.db[this.baseModel].findAll().then(
+            result => {
+                let includesQuery = [];
+                if (result[0].getModelIncludes && result[0].getModelIncludes()) {
+                    result[0].getModelIncludes().forEach(includeItem => {
+                        if (this.db[includeItem]) {
+                            includesQuery.push({
+                                model: this.db[includeItem],
+                                required: false,
+                            });
+                        }
+                    })
+
+                }
+
+                this.db[this.baseModel].findAll({
+                    include: includesQuery
+                }).then(resFind => {
+                    res.json({
+                        message: 'success',
+                        data: resFind,
+                        status: 1,
+                    })
+                })
+            }).catch(err =>
+            res.status(500).json(err)
+        )
+
     }
 
 
@@ -52,29 +70,12 @@ class BaseApiController {
         }
 
         this.db[this.baseModel].findByPk(req.params.id).then(resData => {
-            if (resData) {
-                return res.status(200).json({
-                    message: 'Global.GetDataWithSuccess',
-                    data: resData
-                });
-            } else {
-                return res.status(500).send({
-                    status: false,
-                    message: 'System.Error.DataNotFounded'
-                })
-            }
-        });
-    }
-
-    add(req, res, next) {
-        let Modelinst = this.db[this.baseModel].build(req.body);
-        Modelinst.save().then(CreatedModel => {
-            let whereQuery = {};
-            whereQuery[this.getModelPrimaryKey()] = CreatedModel[this.getModelPrimaryKey()];
+            var whereQuery = {};
+            whereQuery[this.getModelPrimaryKey()] = resData[this.getModelPrimaryKey()];
             let includesQuery = [];
-            if (CreatedModel.getModelIncludes && CreatedModel.getModelIncludes()) {
-                CreatedModel.getModelIncludes().forEach(icludeItem => {
-                    if (this.db[icludeItem]) {
+            if (resData.getModelIncludes && resData.getModelIncludes()) {
+                resData.getModelIncludes().forEach(icludeItem => {
+                    if (this.db[icludeItem]){
                         includesQuery.push({
                             model: this.db[icludeItem],
                             required: false,
@@ -82,15 +83,54 @@ class BaseApiController {
                     }
                 })
             }
-            this.db[this.baseModel].find({
+            console.log('resdata***********',resData.getModelIncludes())
+
+            this.db[this.baseModel].findOne({
                 where: whereQuery,
                 include: includesQuery
             }).then(resFind => {
                 res.json({
-                    test: this.baseModel.modelIncludes,
                     message: 'success',
                     data: resFind,
-                    includesQuery: includesQuery
+                    status: 1,
+
+                })
+            })
+        }).catch(err =>
+            res.status(500).json(err)
+        )
+    }
+
+    add(req, res, next) {
+        let Modelinst = this.db[this.baseModel].build(req.body);
+        let _this = this;
+        Modelinst.save().then(CreatedModel => {
+            let whereQuery = {};
+            whereQuery[_this.getModelPrimaryKey()] = CreatedModel[_this.getModelPrimaryKey()];
+            let includesQuery = [];
+            if (CreatedModel.getModelIncludes && CreatedModel.getModelIncludes()) {
+                CreatedModel.getModelIncludes().forEach(icludeItem => {
+                    if (_this.db[icludeItem]) {
+                        includesQuery.push({
+                            model: _this.db[icludeItem],
+                            required: false,
+                        });
+                    }
+                })
+            }
+            console.log(_this.baseModel);
+
+            _this.db[_this.baseModel].findOne({
+                where: whereQuery,
+                include: includesQuery
+            }).then(resFind => {
+                res.send({
+                    test: _this.baseModel.modelIncludes,
+                    message: 'success',
+                    data: resFind,
+                    includesQuery1: includesQuery,
+                    includesQuery: resFind.getModelIncludes(),
+                    whereQuery: whereQuery
                 })
             })
         })
@@ -117,7 +157,7 @@ class BaseApiController {
         where[this.getModelPrimaryKey()] = req.params.id;
 
         this.db[this.baseModel].destroy({where: where}).then(countDelete => {
-            res.status(200).json({message: 'Post Deleted!'});
+            res.status(200).json({message: 'Element Deleted!'});
         });
     }
 }

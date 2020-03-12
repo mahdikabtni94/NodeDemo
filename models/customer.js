@@ -32,32 +32,51 @@ module.exports = function (sequelize, DataTypes) {
             picpath: {
                 type: DataTypes.STRING
             },
-            city: {
-                type: DataTypes.STRING
+            CountryId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
             },
-        CountryId : {
-            allowNull: true,
-            type: DataTypes.INTEGER
-        }
-
+            StateId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
+            },
+            CityId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
+            }
 
 
         }, {
             tableName: 'Customers'
         }
     );
-     const country = require('./country');
-     customer.prototype.modelIncludes = {
-       'country': {
+    const country = require('./country');
+    const state = require('./state');
+    const city = require('./city');
+    const site = require('./site');
+    customer.prototype.modelIncludes = {
+        'country': {
             model: country
+        },
+        'state': {
+            model: state
+        },
+        'city': {
+            model: city
+        },
+        'site': {
+            model : site
         }
     };
-     customer.prototype.getModelIncludes = function() {
-         return ['country'];
-     };
+    customer.prototype.getModelIncludes = function () {
+        return ['country', 'state', 'city', 'site'];
+    };
     customer.associate = function (models) {
         // associations can be defined here
         customer.belongsTo(models.country, {foreignKey: 'CountryId'});
+        customer.belongsTo(models.city, {foreignKey: 'CityId'});
+        customer.belongsTo(models.state, {foreignKey: 'StateId'});
+        customer.hasMany(models.site,{foreignKey:'ClientId'});
     };
     return customer;
 
