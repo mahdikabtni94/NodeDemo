@@ -4,8 +4,8 @@ const BaseApiController = require('./BaseApiController');
 class ArticleController extends BaseApiController {
 
     constructor() {
-        super('articles');
-        this.baseModel = 'articles';
+        super('article');
+        this.baseModel = 'article';
         this.primary_key = 'article_id';
     }
 

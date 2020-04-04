@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
-    const machinetype = sequelize.define('machine_type', {
+    const machine_type = sequelize.define('machine_type', {
             machinetype_id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
@@ -19,22 +19,27 @@ module.exports = function (sequelize, DataTypes) {
         }
     );
     const machine = require('./machine');
+    const operation = require('./operation');
 
-    machinetype.prototype.modelIncludes = {
+    machine_type.prototype.modelIncludes = {
         'machine': {
             model: machine
         },
+        'operation': {
+            model: operation
+        },
 
     };
-    machinetype.prototype.getModelIncludes = function () {
+    machine_type.prototype.getModelIncludes = function () {
         return ['machine'];
     };
-    machinetype.associate = function (models) {
+    machine_type.associate = function (models) {
         // associations can be defined here
-        machinetype.hasMany(models.machine, {foreignKey: 'MachineTypeId'});
+        machine_type.hasMany(models.machine, {foreignKey: 'MachineTypeId'});
+        machine_type.hasMany(models.operation, {foreignKey: 'MachineTypeId'});
 
     };
-    return machinetype;
+    return machine_type;
 
 };
 

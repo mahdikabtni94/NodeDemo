@@ -24,20 +24,25 @@ module.exports = function (sequelize, DataTypes) {
         }
     );
     const site = require('./site');
+    const operation = require('./operation');
     line.prototype.modelIncludes = {
         'site': {
             model: site
+        },
+        'operation': {
+            model: operation
         },
 
 
     };
     line.prototype.getModelIncludes = function() {
-        return ['site'];
+        return ['site','operation'];
     };
 
     line.associate = function (models) {
         // associations can be defined here
         line.belongsTo(models.site,{foreignKey: 'SiteId'});
+        line.hasMany(models.operation,{foreignKey: 'LineId'});
 
     };
     return line;

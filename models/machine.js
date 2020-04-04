@@ -33,6 +33,7 @@ module.exports = function (sequelize, DataTypes) {
    const machinetype = require('./machine_type');
    const line = require('./line');
    const box = require('./box');
+   const operation_tempalate= require('./operation_template');
     machine.prototype.modelIncludes = {
         'line': {
             model: line
@@ -42,17 +43,22 @@ module.exports = function (sequelize, DataTypes) {
         },
         'box' :{
             model : box
+        },
+        'operation_template' : {
+            model : operation_tempalate
         }
 
     };
     machine.prototype.getModelIncludes = function () {
-        return ['line', 'machine_type','box'];
+        return ['line', 'machine_type','box','operation_template'];
     };
     machine.associate = function (models) {
-        // associations can be defined here
+        // associations can be defined here1
         machine.belongsTo(models.machine_type, {foreignKey: 'MachineTypeId'});
         machine.belongsTo(models.line, {foreignKey: 'LineId'});
         machine.hasOne(models.box, {foreignKey: 'MachineId'});
+        machine.belongsToMany(models.operation_template,{
+            through: 'machine_operation_template', as: 'operations_templates', foreignKey:'MachineId'});
 
     };
     return machine;

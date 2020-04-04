@@ -1,4 +1,4 @@
-module.exports = function (sequelize, DataTypes){
+module.exports = function (sequelize, DataTypes) {
     var user = sequelize.define('user', {
             user_id: {
                 type: DataTypes.INTEGER,
@@ -23,13 +23,13 @@ module.exports = function (sequelize, DataTypes){
             Username: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                unique : true,
+                unique: true,
 
 
             },
             Phone: {
                 type: DataTypes.STRING,
-                allowNull:true
+                allowNull: true
 
             },
             Address: {
@@ -37,20 +37,53 @@ module.exports = function (sequelize, DataTypes){
 
 
             },
+            permissions: DataTypes.VIRTUAL,
             City: {
                 type: DataTypes.STRING,
             },
-            Profile: {
+            user: {
                 type: DataTypes.STRING,
 
             },
             Activated: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: '0'
+            },
+            ClientId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
+            },
+            ProfileId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
             }
+
         },
         {
             tableName: 'Users'
         });
-return user
+
+    const profile = require('./profile');
+    const customer = require('./customer');
+    user.prototype.modelIncludes = {
+        'profile': {
+            model: profile
+        },
+        'customer': {
+            model: customer
+        },
+
+
+    };
+    user.prototype.getModelIncludes = function () {
+        return ['profile', 'customer'];
+    };
+    user.associate = function (models) {
+        // associations can be defined here1
+        user.belongsTo(models.profile, {foreignKey: 'ProfileId'});
+        user.belongsTo(models.customer, {foreignKey: 'ClientId'});
+
+
+    };
+    return user
 };

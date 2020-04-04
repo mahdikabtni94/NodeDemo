@@ -75,7 +75,7 @@ class BaseApiController {
             let includesQuery = [];
             if (resData.getModelIncludes && resData.getModelIncludes()) {
                 resData.getModelIncludes().forEach(icludeItem => {
-                    if (this.db[icludeItem]){
+                    if (this.db[icludeItem]) {
                         includesQuery.push({
                             model: this.db[icludeItem],
                             required: false,
@@ -83,7 +83,7 @@ class BaseApiController {
                     }
                 })
             }
-            console.log('resdata***********',resData.getModelIncludes())
+            console.log('resdata***********', resData.getModelIncludes())
 
             this.db[this.baseModel].findOne({
                 where: whereQuery,
@@ -107,7 +107,7 @@ class BaseApiController {
         Modelinst.save().then(CreatedModel => {
             let whereQuery = {};
             whereQuery[_this.getModelPrimaryKey()] = CreatedModel[_this.getModelPrimaryKey()];
-            let includesQuery = [];
+            let includesQuery = (this.baseModel.modelIncludes && this.baseModel.modelIncludes.length) ? (this.baseModel.modelIncludes && this.baseModel.modelIncludes.length) :[];
             if (CreatedModel.getModelIncludes && CreatedModel.getModelIncludes()) {
                 CreatedModel.getModelIncludes().forEach(icludeItem => {
                     if (_this.db[icludeItem]) {
@@ -124,12 +124,11 @@ class BaseApiController {
                 where: whereQuery,
                 include: includesQuery
             }).then(resFind => {
-                res.send({
+                res.json({
                     test: _this.baseModel.modelIncludes,
                     message: 'success',
                     data: resFind,
                     includesQuery1: includesQuery,
-                    includesQuery: resFind.getModelIncludes(),
                     whereQuery: whereQuery
                 })
             })
@@ -137,18 +136,46 @@ class BaseApiController {
             .catch(err =>
                 res.status(500).json(err)
             )
+
     }
 
     update(req, res, next) {
         const where = {};
         where[this.getModelPrimaryKey()] = req.params.id;
+        let _this = this;
         this.db[this.baseModel].update(
             req.body,
             {where: where})
-            .then(result => {
-                console.log(result);
-                res.status(200).json({message: 'Update Successful!'});
+            .then(CreatedModel => {
+                let includesQuery = [];
+                if (CreatedModel.getModelIncludes && CreatedModel.getModelIncludes()) {
+                    CreatedModel.getModelIncludes().forEach(icludeItem => {
+                        if (_this.db[icludeItem]) {
+                            includesQuery.push({
+                                model: _this.db[icludeItem],
+                                required: false,
+                            });
+                        }
+                    })
+                }
+
+                _this.db[_this.baseModel].findOne({
+                    where: where,
+                    include: includesQuery
+                }).then(resFind => {
+                    res.send({
+                        test: _this.baseModel.modelIncludes,
+                        message: 'success',
+                        data: resFind,
+                        includesQuery1: includesQuery,
+                        includesQuery: resFind.getModelIncludes(),
+                        whereQuery: where
+                    })
+                })
             })
+            .catch(err =>
+                res.status(500).json(err)
+            )
 
     }
 
