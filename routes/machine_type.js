@@ -13,4 +13,10 @@ router.get("/find", function (req, res, next) {
 router.get("/find/:id", function (req, res, next) {
     Machine_TypeControllerinst.get(req, res, next);
 });
+router.put("/update/:id", function (req, res, next) {
+    Machine_TypeControllerinst.update(req, res, next);
+});
+router.delete("/delete/:id", function (req, res, next) {
+    Machine_TypeControllerinst.delete(req, res, next);
+});
 module.exports = router;

@@ -7,6 +7,10 @@ const JobControllerinst = new JobController();
 router.post("/add", function (req, res, next) {
     JobControllerinst.add(req, res, next);
 });
+
+router.delete("/delete/:id", function (req, res, next) {
+    JobControllerinst.delete(req, res, next);
+});
 router.put("/update/:id", function (req, res, next) {
     JobControllerinst.update(req, res, next);
 });

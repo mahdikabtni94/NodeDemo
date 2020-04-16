@@ -15,15 +15,15 @@ module.exports = function (sequelize, DataTypes) {
             },
             has_update: {
                 type: DataTypes.STRING,
-                defaultValue :'false'
+                defaultValue :'N'
             },
             has_delete: {
                 type: DataTypes.STRING,
-                defaultValue :'false'
+                defaultValue :'N'
             },
             has_save: {
                 type: DataTypes.STRING,
-                defaultValue :'false'
+                defaultValue :'N'
             }
 
 

@@ -11,7 +11,7 @@ module.exports = function (sequelize, DataTypes) {
 
             },
             startworkingdate: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATEONLY,
             },
             manifacturerlifetime: {
                 type: DataTypes.STRING,
@@ -58,7 +58,7 @@ module.exports = function (sequelize, DataTypes) {
         machine.belongsTo(models.line, {foreignKey: 'LineId'});
         machine.hasOne(models.box, {foreignKey: 'MachineId'});
         machine.belongsToMany(models.operation_template,{
-            through: 'machine_operation_template', as: 'operations_templates', foreignKey:'MachineId'});
+            through: 'machine_operation_template', foreignKey:'MachineId'});
 
     };
     return machine;

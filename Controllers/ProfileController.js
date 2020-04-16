@@ -48,6 +48,58 @@ AddProfile(req,res,next){
         )
 
 }
+    updateProfile(req, res, next) {
+        const where = {};
+        where[this.getModelPrimaryKey()] = req.params.id;
+        let _this = this;
+        this.db[this.baseModel].update(
+            req.body,
+            {where: where})
+            .then(UpdatedModel => {
+                this.db[this.baseModel].findOne({
+                    where: where
+                }).then(result1 => {
+                    if(req.body.permissions){
+                        result1.setPermissions(req.body.permissions);
+                    }
+                    let includesQuery = [];
+                    if (result1.getModelIncludes && result1.getModelIncludes()) {
+                        result1.getModelIncludes().forEach(icludeItem => {
+                            if (this.db[icludeItem]) {
+                                includesQuery.push({
+                                    model: this.db[icludeItem],
+                                    required: false,
+                                });
+                            }
+                        })
+                    }
+
+                    this.db[this.baseModel].findOne({
+                        where: where,
+                        include: includesQuery
+                    }).then(resFind => {
+                        res.json({
+                            test: this.baseModel.modelIncludes,
+                            message: 'success',
+                            data: resFind, status: 1,
+                            includesQuery: includesQuery
+                        })
+                    })
+
+                })
+
+                // res.json(result)
+            })
+            .catch(err =>
+                res.status(500).json(err)
+            )
+                }
+
+
+
+
+
+
 
 }
 

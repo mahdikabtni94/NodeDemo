@@ -16,7 +16,7 @@ router.put("/update/:id", function (req, res, next) {
 router.get("/find/:id", function (req, res, next) {
     LineControllerinst.get(req, res, next);
 });
-router.get("/delete/:id", function (req, res, next) {
+router.delete("/delete/:id", function (req, res, next) {
     LineControllerinst.delete(req, res, next);
 });
 module.exports = router;

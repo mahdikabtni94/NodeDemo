@@ -17,6 +17,6 @@ router.delete("/delete/:id", function (req, res, next) {
     ProfileControllerinst.delete(req, res, next);
 });
 router.put("/update/:id", function (req, res, next) {
-    ProfileControllerinst.update(req, res, next);
+    ProfileControllerinst.updateProfile(req, res, next);
 });
 module.exports = router;

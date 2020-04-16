@@ -6,7 +6,7 @@ module.exports = function (sequelize, DataTypes) {
                 autoIncrement: true,
                 primaryKey: true,
             },
-            machinetype_type: {
+            type: {
                 type: DataTypes.STRING,
 
             },
@@ -31,7 +31,7 @@ module.exports = function (sequelize, DataTypes) {
 
     };
     machine_type.prototype.getModelIncludes = function () {
-        return ['machine'];
+        return ['machine','operation'];
     };
     machine_type.associate = function (models) {
         // associations can be defined here

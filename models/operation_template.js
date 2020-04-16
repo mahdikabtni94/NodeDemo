@@ -57,7 +57,7 @@ module.exports = function (sequelize, DataTypes) {
     operation_template.associate = function (models) {
         // associations can be defined here
         operation_template.belongsToMany(models.machine, {
-            through: 'machine_operation_template', as: 'machines', foreignKey: 'OperationTemplateId'
+            through: 'machine_operation_template', foreignKey: 'OperationTemplateId'
         });
         operation_template.belongsTo(models.machine_type, {foreignKey: 'MachineTypeId'});
 

@@ -7,6 +7,12 @@ const CountryControllerinst = new CountryController();
 router.post("/add", function (req, res, next) {
     CountryControllerinst.add(req, res, next);
 });
+router.delete("/delete/:id", function (req, res, next) {
+    CountryControllerinst.delete(req, res, next);
+});
+router.put("/update/:id", function (req, res, next) {
+    CountryControllerinst.update(req, res, next);
+});
 router.get("/find", function (req, res, next) {
     CountryControllerinst.find(req, res, next);
 });

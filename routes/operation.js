@@ -16,5 +16,8 @@ router.get("/find/:id", function (req, res, next) {
 router.put("/update/:id", function (req, res, next) {
     OperationControllerinst.update(req, res, next);
 });
+router.delete("/delete/:id", function (req, res, next) {
+    OperationControllerinst.delete(req, res, next);
+});
 
 module.exports = router;

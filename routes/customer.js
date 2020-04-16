@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 });
 
 const CustomerControllerinst = new CustomerController();
-router.post("/add",multer({storage: storage}).single('image') ,function (req, res, next) {
+router.post("/add",multer({storage: storage}).single('picpath') ,function (req, res, next) {
    CustomerControllerinst.addCustomer(req, res, next);
 });
 router.get("/find", function (req, res, next) {
@@ -37,7 +37,7 @@ router.get("/find", function (req, res, next) {
 router.get("/find/:id", function (req, res, next) {
     CustomerControllerinst.get(req, res, next);
 });
-router.put("/update/:id",multer({storage: storage}).single('image'), function (req, res, next) {
+router.put("/update/:id",multer({storage: storage}).single('picpath'), function (req, res, next) {
     CustomerControllerinst.UpdateCustomer(req, res, next);
 });
 router.delete("/delete/:id", function (req, res, next) {

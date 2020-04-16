@@ -30,7 +30,8 @@ class userController extends BaseApiController {
             user.Address = req.body.Address;
             user.Phone = req.body.Phone;
             user.City = req.body.City;
-            user.Profile = req.body.Profile;
+            user.ProfileId = req.body.ProfileId;
+            user.ClientId = req.body.ClientId;
             user.Activated = false;
             user.save().then(result => {
                 const emailtoken = jwt.sign(
@@ -106,7 +107,10 @@ class userController extends BaseApiController {
                         });
                     } else {
                         const token = jwt.sign(
-                            {email: fetcheduser.email, userId: fetcheduser.user_id},
+                            {
+                                email: fetcheduser.email,
+                                userId: fetcheduser.user_id
+                            },
                             "secret_this_should_be_longer",
                             {expiresIn: "1h"}
                         );
@@ -169,7 +173,6 @@ class userController extends BaseApiController {
         }
 
     }
-
 
 
     confirmuserAccount(req, res, next) {

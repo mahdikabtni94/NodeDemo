@@ -69,7 +69,7 @@ class CustomerController extends BaseApiController {
         where[this.getModelPrimaryKey()] = req.params.id;
         if (req.file) {
             const url = req.protocol + "://" + req.get("host");
-            imagePath = JSON.parse(url + "/images/" + req.file.filename);
+            imagePath = JSON.parse(JSON.stringify({url: url + "/images/" + req.file.filename}));
         }
         db.customer.update(
             {
@@ -80,7 +80,7 @@ class CustomerController extends BaseApiController {
                 technical_contact: req.body.technical_contact,
                 sales_contact: req.body.sales_contact,
                 fax: req.body.fax,
-                picpath: imagePath,
+                picpath: imagePath.url,
                 CountryId: req.body.CountryId,
                 StateId: req.body.StateId,
                 CityId: req.body.CityId

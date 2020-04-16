@@ -41,10 +41,6 @@ module.exports = function (sequelize, DataTypes) {
             City: {
                 type: DataTypes.STRING,
             },
-            user: {
-                type: DataTypes.STRING,
-
-            },
             Activated: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: '0'
