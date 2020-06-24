@@ -19,6 +19,28 @@ module.exports = function (sequelize, DataTypes) {
             tableName: 'has_permissions'
         }
     );
+    const profile = require('./profile');
+    const permission = require('./permission');
+    has_permissions.prototype.modelIncludes = {
+        'profile': {
+            model: profile
+        },
+        'permission': {
+            model: permission
+        },
+
+
+    };
+    has_permissions.prototype.getModelIncludes = function () {
+        return ['profile', 'permission'];
+    };
+    has_permissions.associate = function (models) {
+        // associations can be defined here1
+        has_permissions.belongsTo(models.profile, {foreignKey: 'ProfileId'});
+        has_permissions.belongsTo(models.permission, {foreignKey: 'PermissionId'});
+
+
+    };
 
 
     return has_permissions;

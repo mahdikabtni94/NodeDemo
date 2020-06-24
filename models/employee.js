@@ -19,8 +19,11 @@ module.exports = function (sequelize, DataTypes) {
 
             },
             start_working_date: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATE,
 
+            },
+            last_login_date: {
+                type: DataTypes.DATE,
             },
             emp_address: {
                 type: DataTypes.STRING,
@@ -40,7 +43,14 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.STRING
 
             },
+            status: {
+                type: DataTypes.STRING
+            },
             profile_image: {
+                type: DataTypes.STRING
+
+            },
+            email: {
                 type: DataTypes.STRING
 
             },
@@ -49,8 +59,6 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.INTEGER
 
             },
-
-
 
 
         }, {
@@ -70,7 +78,7 @@ module.exports = function (sequelize, DataTypes) {
 
     };
     employee.prototype.getModelIncludes = function () {
-        return ['job','cart_pending_session'];
+        return ['job', 'cart_pending_session'];
     };
     employee.associate = function (models) {
         // associations can be defined here

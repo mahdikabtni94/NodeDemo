@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
     const operation = sequelize.define('operation', {
-            operation_template_id: {
+            operation_id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true,

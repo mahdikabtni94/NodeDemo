@@ -85,15 +85,13 @@ class userController extends BaseApiController {
 
         if (req.body.email && req.body.password) {
             db.user.findOne({
+                include: [{
+                    model: db.profile,
+                }],
                 where: {
-                    [Op.or]: [
-
-                        {email: req.body.email}
-                    ],
-
+                    email: req.body.email
                 }
-            })
-                .then(user => {
+            }).then(user => {
                     if (!user) {
                         return res.status(401).json({
                             message: "Auth failed"
@@ -106,20 +104,36 @@ class userController extends BaseApiController {
                             message: "Wrong Password"
                         });
                     } else {
-                        const token = jwt.sign(
-                            {
-                                email: fetcheduser.email,
-                                userId: fetcheduser.user_id
-                            },
-                            "secret_this_should_be_longer",
-                            {expiresIn: "1h"}
-                        );
+                        db.has_permissions.findAll({
 
-
-                        return res.status(200).json({
-                            token: token,
-                            expiresIn: 3600
-                        });
+                            include: [{
+                                model: db.permission,
+                            }],
+                            where: {
+                                ProfileId: fetcheduser.profile.profile_id,
+                            }
+                        }).then(function (permissions) {
+                            const token = jwt.sign(
+                                {
+                                    email: fetcheduser.email,
+                                    userId: fetcheduser.user_id
+                                },
+                                "secret_this_should_be_longer",
+                                {expiresIn: "1h"}
+                            );
+                            fetcheduser.permissions = [];
+                            permissions.forEach(permission => {
+                                fetcheduser.permissions.push(permission.permission.permission_label);
+                            });
+                            res.json({
+                                message: 'Success',
+                                user: fetcheduser.toJSON(),
+                                success: true,
+                                token: token,
+                                permissions: permissions,
+                                expiresIn: 3600
+                            });
+                        })
                     }
                 })
                 .catch(err => {

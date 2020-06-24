@@ -40,6 +40,8 @@ module.exports = function (sequelize, DataTypes) {
     );
     const machinetype = require('./machine_type');
     const machine = require('./machine');
+    const sequence = require('./sequence');
+    const article = require('./articles');
     operation_template.prototype.modelIncludes = {
 
         'machine_type': {
@@ -47,12 +49,18 @@ module.exports = function (sequelize, DataTypes) {
         },
         'machine': {
             model: machine
+        },
+        'sequence': {
+            model: sequence
+        },
+        'article':{
+            model: article
         }
 
 
     };
     operation_template.prototype.getModelIncludes = function () {
-        return ['machine_type', 'machine'];
+        return ['machine_type', 'machine','sequence','article'];
     };
     operation_template.associate = function (models) {
         // associations can be defined here
@@ -60,6 +68,9 @@ module.exports = function (sequelize, DataTypes) {
             through: 'machine_operation_template', foreignKey: 'OperationTemplateId'
         });
         operation_template.belongsTo(models.machine_type, {foreignKey: 'MachineTypeId'});
+        operation_template.hasMany(models.sequence,{foreignKey: 'operation_template_id'});
+        operation_template.belongsToMany(models.article, {
+            through: 'has_operations', foreignKey :'OperationId'});
 
 
     };

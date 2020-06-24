@@ -8,6 +8,7 @@ class OperationTemplateController extends BaseApiController {
         this.baseModel = 'operation_template';
     }
 
+
 }
 
 module.exports = OperationTemplateController;

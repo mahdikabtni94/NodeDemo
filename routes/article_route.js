@@ -13,14 +13,14 @@ router.get('/:id', function (req, res, next) {
 });
 
 router.post("/add", function (req, res, next) {
-    ArticleControllerInst.add(req, res, next);
+    ArticleControllerInst.AddArticle(req, res, next);
 });
 
-router.put("/:id", function (req, res, next) {
-    ArticleControllerInst.update(req, res, next);
+router.put("/update/:id", function (req, res, next) {
+    ArticleControllerInst.updateArticle(req, res, next);
 });
 
-router.delete("/:id", checkAuth, function (req, res, next) {
+router.delete("/delete/:id", function (req, res, next) {
     ArticleControllerInst.delete(req, res, next);
 });
 

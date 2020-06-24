@@ -6,9 +6,13 @@ module.exports = function (sequelize, DataTypes) {
                 primaryKey: true,
                 autoIncrement: true
             },
-            label: {
+            article_name :{
                 type : DataTypes.STRING,
-                allowNull : false,
+            },
+
+           code: {
+                type : DataTypes.STRING,
+                allowNull : true,
 
             },
             description :{
@@ -22,18 +26,24 @@ module.exports = function (sequelize, DataTypes) {
         },
     );
     const order = require('./order');
+    const operation_template = require('./operation_template');
 
     article.prototype.modelIncludes = {
         'order': {
             model: order
         },
+        'operation_template': {
+            model: operation_template
+        },
     };
     article.prototype.getModelIncludes = function () {
-        return ['order'];
+        return ['order','operation_template'];
     };
     article.associate = function (models) {
         // associations can be defined here1
         article.hasMany(models.order, {foreignKey: 'ArticleId'});
+        article.belongsToMany(models.operation_template, {
+            through: 'has_operations', foreignKey :'ArticleId'});
 
 
     };

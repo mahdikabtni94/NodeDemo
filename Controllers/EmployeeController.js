@@ -16,30 +16,62 @@ class EmployeeController extends BaseApiController {
                 job_label: job
             }
         }).then(function (job) {
-            let operator = db.employee.build();
+            const url = req.protocol + "://" + req.get("host");
+            const imageURL = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
+            console.log("operator******", req.body);
+            console.log("photo", imageURL.url);
+            const operator = db.employee.build();
             operator.emp_name = req.body.emp_name;
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
+            operator.last_login_date = req.body.last_login_date;
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
             operator.city = req.body.city;
             operator.emp_age = req.body.emp_age;
             operator.emp_matricule = req.body.emp_matricule;
-            operator.profile_image = req.body.profile_image;
+            operator.status = req.body.status;
+            operator.email = req.body.email;
+            operator.profile_image = imageURL.url;
             operator.JobId = job.job_id;
-            operator.save().then(CreatedModel => {
 
-                res.json({
-                    message: 'Operator added succesfully',
-                    data: CreatedModel,
+            operator.save().then(CreatedModel => {
+                let _this = this;
+                let whereQuery = {};
+                whereQuery[_this.getModelPrimaryKey()] = CreatedModel[_this.getModelPrimaryKey()];
+                let includesQuery = [];
+                if (CreatedModel.getModelIncludes && CreatedModel.getModelIncludes()) {
+                    CreatedModel.getModelIncludes().forEach(icludeItem => {
+                        if (db[icludeItem]) {
+                            includesQuery.push({
+                                model: db[icludeItem],
+                                required: false,
+                            });
+                        }
+                    })
+                }
+                db.employee.findOne({
+                    where: whereQuery,
+                    include: includesQuery
+                }).then(resFind => {
+                    res.status(201).json({
+                        message: 'Employee Added Successfully',
+                        data:
+                            {
+                                resFind,
+
+                            }
+                    });
 
                 })
-            })
-        }).catch(err =>
-            res.status(500).json(err)
-        )
 
+
+            }).catch(err =>
+                res.status(500).json(err)
+            )
+
+    })
     }
 
     addSupervisor(req, res, next) {
@@ -49,17 +81,22 @@ class EmployeeController extends BaseApiController {
                 job_label: job
             }
         }).then(function (job) {
+            const url = req.protocol + "://" + req.get("host");
+            const imageURL = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
             let operator = db.employee.build();
             operator.emp_name = req.body.emp_name;
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
+            operator.last_login_date = req.body.last_login_date;
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
             operator.city = req.body.city;
             operator.emp_age = req.body.emp_age;
             operator.emp_matricule = req.body.emp_matricule;
-            operator.profile_image = req.body.profile_image;
+            operator.status = req.body.status;
+            operator.email = req.body.email;
+            operator.profile_image = imageURL.url;
             operator.JobId = job.job_id;
             operator.save().then(CreatedModel => {
 
@@ -82,17 +119,22 @@ class EmployeeController extends BaseApiController {
                 job_label: job
             }
         }).then(function (job) {
+            const url = req.protocol + "://" + req.get("host");
+            const imageURL = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
             let operator = db.employee.build();
             operator.emp_name = req.body.emp_name;
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
+            operator.last_login_date = req.body.last_login_date;
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
             operator.city = req.body.city;
             operator.emp_age = req.body.emp_age;
             operator.emp_matricule = req.body.emp_matricule;
-            operator.profile_image = req.body.profile_image;
+            operator.profile_image = imageURL.url;
+            operator.status = req.body.status;
+            operator.email = req.body.email;
             operator.JobId = job.job_id;
             operator.save().then(CreatedModel => {
 
@@ -115,17 +157,22 @@ class EmployeeController extends BaseApiController {
                 job_label: job
             }
         }).then(function (job) {
+            const url = req.protocol + "://" + req.get("host");
+            const imageURL = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
             let operator = db.employee.build();
             operator.emp_name = req.body.emp_name;
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
+            operator.last_login_date = req.body.last_login_date;
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
             operator.city = req.body.city;
             operator.emp_age = req.body.emp_age;
             operator.emp_matricule = req.body.emp_matricule;
-            operator.profile_image = req.body.profile_image;
+            operator.status = req.body.status;
+            operator.profile_image = imageURL.url;
+            operator.email = req.body.email;
             operator.JobId = job.job_id;
             operator.save().then(CreatedModel => {
 
@@ -342,6 +389,37 @@ class EmployeeController extends BaseApiController {
             }).catch(err =>
             res.status(500).json(err)
         )
+
+    }
+    UpdateEmployee(req, res, next) {
+        const where = {};
+        let imagePath = req.body.profile_image;
+        where[this.getModelPrimaryKey()] = req.params.id;
+        if (req.file) {
+            const url = req.protocol + "://" + req.get("host");
+            imagePath = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
+        }
+        db.employee.update(
+            {
+                emp_name: req.body.emp_name,
+                emp_lastname: req.body.emp_lastname,
+                emp_gender: req.body.emp_gender,
+                start_working_date: req.body.start_working_date,
+                last_login_date: req.body.last_login_date,
+                emp_address: req.body.emp_address,
+                emp_rfid: req.body.emp_rfid,
+                profile_image: imagePath.url,
+                city: req.body.city,
+                emp_age: req.body. emp_age,
+                emp_matricule: req.body.emp_matricule,
+                status: req.body.status,
+                email: req.body.email
+            },
+            {where: where})
+            .then(result => {
+                console.log(result);
+                res.status(200).json({message: 'Update Successful!', data: result});
+            })
 
     }
 }

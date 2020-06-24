@@ -24,10 +24,13 @@ const routeOperationTemplate = require("./routes/operation_template");
 const routeCartPendingOperation = require("./routes/cart_pending_operation");
 const routeCartPendingSession = require("./routes/cart_pending_session");
 const routeUserSession = require("./routes/usersession");
+const routeSequence = require("./routes/sequence");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use("/images", express.static(path.join("images")));
+app.use("/emp-images", express.static(path.join("images/employeeImages")));
+app.use("/seq-images", express.static(path.join("images/sequenceImages")));
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
@@ -63,6 +66,7 @@ app.use("/api/operation_template",routeOperationTemplate);
 app.use("/api/cart_pending_operation",routeCartPendingOperation);
 app.use("/api/cart_pending_session",routeCartPendingSession);
 app.use("/api/usersession",routeUserSession);
+app.use("/api/sequence",routeSequence);
 
 
 module.exports = app;
