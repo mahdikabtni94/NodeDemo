@@ -55,6 +55,8 @@ module.exports = function (sequelize, DataTypes) {
     const city = require('./city');
     const site = require('./site');
     const user = require('./user');
+    const order = require('./order');
+
     customer.prototype.modelIncludes = {
         'country': {
             model: country
@@ -66,22 +68,26 @@ module.exports = function (sequelize, DataTypes) {
             model: city
         },
         'site': {
-            model : site
+            model: site
         },
-        'user' : {
-            model : user
+        'user': {
+            model: user
+        },
+        'order': {
+            model: order
         }
     };
     customer.prototype.getModelIncludes = function () {
-        return ['country', 'state', 'city', 'site','user'];
+        return ['country', 'state', 'city', 'site', 'user','order'];
     };
     customer.associate = function (models) {
         // associations can be defined here
         customer.belongsTo(models.country, {foreignKey: 'CountryId'});
         customer.belongsTo(models.city, {foreignKey: 'CityId'});
         customer.belongsTo(models.state, {foreignKey: 'StateId'});
-        customer.hasMany(models.site,{foreignKey:'ClientId'});
-        customer.hasMany(models.user,{foreignKey:'ClientId'});
+        customer.hasMany(models.site, {foreignKey: 'ClientId'});
+        customer.hasMany(models.user, {foreignKey: 'ClientId'});
+        customer.hasMany(models.order, {foreignKey: 'CustomerId'});
     };
     return customer;
 

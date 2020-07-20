@@ -9,6 +9,10 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.STRING,
 
             },
+            code: {
+                type: DataTypes.STRING,
+
+            },
             version: {
                 type: DataTypes.INTEGER,
                 allowNull: true,
@@ -39,6 +43,7 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.INTEGER,
 
             },
+
         }, {
             tableName: 'bundles'
 
@@ -47,6 +52,7 @@ module.exports = function (sequelize, DataTypes) {
     const order = require('./order');
     const operation = require('./operation');
     const cart_pending_operation = require('./cart_pending_operation');
+    const line = require('./line');
 
     bundle.prototype.modelIncludes = {
         'order': {
@@ -58,15 +64,20 @@ module.exports = function (sequelize, DataTypes) {
         'cart_pending_operation': {
             model: cart_pending_operation
         },
+        'line': {
+            model: line
+        },
     };
     bundle.prototype.getModelIncludes = function () {
-        return ['order', 'operation','cart_pending_operation'];
+        return ['order', 'operation', 'cart_pending_operation', 'line'];
     };
     bundle.associate = function (models) {
         // associations can be defined here1
         bundle.belongsTo(models.order, {foreignKey: 'OrderId'});
         bundle.hasMany(models.operation, {foreignKey: 'BundleId'});
-        bundle.hasOne(models.cart_pending_operation,{foreignKey:'BundleId'});
+       bundle.belongsToMany(models.line, {
+                through: 'lines_bundles', foreignKey :'BundleId'});
+        bundle.hasOne(models.cart_pending_operation, {foreignKey: 'BundleId'});
 
 
     };

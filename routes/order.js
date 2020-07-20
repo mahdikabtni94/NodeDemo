@@ -4,8 +4,8 @@ const OrderController = require('../Controllers/OrderController');
 const checkAuth = require("../MiddleWare/check-auth");
 
 const OrderControllerinst = new OrderController();
-router.post("/add", function (req, res, next) {
-    OrderControllerinst.add(req, res, next);
+router.post("/addOrderWbundle", function (req, res, next) {
+    OrderControllerinst.AddOrderWithBundles(req, res, next);
 });
 router.get("/find", function (req, res, next) {
     OrderControllerinst.find(req, res, next);

@@ -2,10 +2,11 @@
 module.exports = function (sequelize, DataTypes) {
     const has_permissions = sequelize.define('has_permissions', {
             has_permissions_id: {
-                type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true,
+                type: DataTypes.INTEGER
             },
+        type: DataTypes.INTEGER,
             ProfileId: {
                 allowNull: true,
                 type: DataTypes.INTEGER

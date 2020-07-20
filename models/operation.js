@@ -33,13 +33,7 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            LineId: {
-                allowNull: true,
-                type: DataTypes.INTEGER
-            },
-            quantity: {
-                type: DataTypes.INTEGER
-            },
+
 
 
         }, {
@@ -73,7 +67,7 @@ module.exports = function (sequelize, DataTypes) {
     operation.associate = function (models) {
         // associations can be defined here
         operation.belongsTo(models.machine_type, {foreignKey: 'MachineTypeId'});
-        operation.belongsTo(models.line, {foreignKey: 'LineId'});
+        operation.belongsToMany(models.line, {through: 'operations_lines', foreignKey: 'OperationId'});
         operation.belongsTo(models.bundle, {foreignKey: 'BundleId'});
         operation.hasMany(models.cart_pending_operation, {foreignKey: 'OperationId'});
 

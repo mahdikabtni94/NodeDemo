@@ -9,14 +9,13 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.STRING,
 
             },
-              line_description :{
-                type : DataTypes.STRING,
-              },
-               SiteId : {
-                   allowNull : true,
-                   type : DataTypes.INTEGER
-               }
-
+            line_description: {
+                type: DataTypes.STRING,
+            },
+            SiteId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
+            }
 
 
         }, {
@@ -25,6 +24,7 @@ module.exports = function (sequelize, DataTypes) {
     );
     const site = require('./site');
     const operation = require('./operation');
+    const bundle = require('./bundle');
     line.prototype.modelIncludes = {
         'site': {
             model: site
@@ -32,17 +32,23 @@ module.exports = function (sequelize, DataTypes) {
         'operation': {
             model: operation
         },
+        'bundle': {
+            model: bundle
+        }
 
 
     };
-    line.prototype.getModelIncludes = function() {
-        return ['site','operation'];
+    line.prototype.getModelIncludes = function () {
+        return ['site', 'operation', 'bundle'];
     };
 
     line.associate = function (models) {
         // associations can be defined here
-        line.belongsTo(models.site,{foreignKey: 'SiteId'});
-        line.hasMany(models.operation,{foreignKey: 'LineId'});
+        line.belongsTo(models.site, {foreignKey: 'SiteId'});
+        line.belongsToMany(models.operation, {through: 'operations_lines', foreignKey: 'LineId'});
+        line.belongsToMany(models.bundle, {
+            through: 'lines_bundles', foreignKey: 'LineId'
+        });
 
     };
     return line;

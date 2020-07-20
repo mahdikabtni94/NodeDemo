@@ -23,6 +23,11 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.INTEGER,
 
             },
+            CustomerId: {
+                allowNull: true,
+                type: DataTypes.INTEGER,
+
+            },
 
 
         }, {
@@ -32,6 +37,7 @@ module.exports = function (sequelize, DataTypes) {
 
     const article = require('./articles');
     const bundle = require('./bundle');
+    const customer = require('./customer');
 
     order.prototype.modelIncludes = {
         'article': {
@@ -40,14 +46,18 @@ module.exports = function (sequelize, DataTypes) {
         'bundle': {
             model: bundle
         },
+        'customer': {
+            model: customer
+        },
     };
     order.prototype.getModelIncludes = function () {
-        return ['article','bundle'];
+        return ['article', 'bundle','customer'];
     };
     order.associate = function (models) {
         // associations can be defined here1
         order.belongsTo(models.article, {foreignKey: 'ArticleId'});
         order.hasMany(models.bundle, {foreignKey: 'OrderId'});
+        order.belongsTo(models.customer, {foreignKey: 'CustomerId'});
 
 
     };

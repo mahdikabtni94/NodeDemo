@@ -3,8 +3,6 @@ class BaseApiController {
     constructor(baseModelDao) {
         this.db = require('../models');
         this.baseModel = baseModelDao;
-        this.findWhere = null;
-        this.findInclude = null;
         this.baseModel = null;
     }
 
