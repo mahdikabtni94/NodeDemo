@@ -10,8 +10,8 @@ router.post("/addOrderWbundle", function (req, res, next) {
 router.get("/find", function (req, res, next) {
     OrderControllerinst.find(req, res, next);
 });
-router.get("/find/:id", function (req, res, next) {
-    OrderControllerinst.get(req, res, next);
+router.get("/findByOrder/:id", function (req, res, next) {
+    OrderControllerinst.FindOrder(req, res, next);
 });
 router.delete("/delete/:id", function (req, res, next) {
     OrderControllerinst.delete(req, res, next);

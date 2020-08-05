@@ -24,4 +24,16 @@ router.delete("/delete/:id", function (req, res, next) {
     ArticleControllerInst.delete(req, res, next);
 });
 
+router.get("/findOperationsById/:id", function (req, res, next) {
+    ArticleControllerInst.FindOperationsByArticle(req, res, next);
+});
+/*router.get("/findLinesAndOperationsById/:id", function (req, res, next) {
+    ArticleControllerInst.FindLinesAndOperationsByArticle(req, res, next);
+});*/
+router.get("/findLinesById/:id", function (req, res, next) {
+    ArticleControllerInst.FindLinesBYArticle(req, res, next);
+});
+router.get("/findOperationsByLine/:id", function (req, res, next) {
+    ArticleControllerInst.FindOperationsByLine(req, res, next);
+});
 module.exports = router;

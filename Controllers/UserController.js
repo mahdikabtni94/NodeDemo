@@ -32,7 +32,12 @@ class userController extends BaseApiController {
             user.City = req.body.City;
             user.ProfileId = req.body.ProfileId;
             user.ClientId = req.body.ClientId;
-            user.Activated = false;
+            if (req.body.Activated === true){
+                user.Activated = true
+            }
+            else {
+                user.Activated = false;
+            }
             user.save().then(result => {
                 const emailtoken = jwt.sign(
                     {user_id: result.user_id},
@@ -83,6 +88,7 @@ class userController extends BaseApiController {
             });
         }
 
+
         if (req.body.email && req.body.password) {
             db.user.findOne({
                 include: [{
@@ -95,6 +101,11 @@ class userController extends BaseApiController {
                     if (!user) {
                         return res.status(401).json({
                             message: "Auth failed"
+                        });
+                    }
+                    if (user.Activated === false){
+                        return  res.status(401).json({
+                            message :"Account not Activated"
                         });
                     }
                     fetcheduser = user;

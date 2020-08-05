@@ -1,6 +1,6 @@
 
 const BaseApiController = require('./BaseApiController');
-
+let db = require('../models');
 class MachineController extends BaseApiController {
 
     constructor() {

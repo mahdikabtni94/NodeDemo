@@ -18,6 +18,9 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.STRING,
 
             },
+            quantity: {
+                type: DataTypes.INTEGER,
+            },
             ArticleId: {
                 allowNull: true,
                 type: DataTypes.INTEGER,
@@ -51,7 +54,7 @@ module.exports = function (sequelize, DataTypes) {
         },
     };
     order.prototype.getModelIncludes = function () {
-        return ['article', 'bundle','customer'];
+        return ['article', 'bundle', 'customer'];
     };
     order.associate = function (models) {
         // associations can be defined here1
