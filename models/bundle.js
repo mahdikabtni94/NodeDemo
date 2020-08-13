@@ -6,7 +6,7 @@ module.exports = function (sequelize, DataTypes) {
                 autoIncrement: true
             },
             num_bundle: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
 
             },
             code: {
@@ -23,7 +23,7 @@ module.exports = function (sequelize, DataTypes) {
 
             },
             quantity: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
 
             },
             CreatedAt: {
@@ -51,7 +51,6 @@ module.exports = function (sequelize, DataTypes) {
     );
     const order = require('./order');
     const operation = require('./operation');
-    const cart_pending_operation = require('./cart_pending_operation');
     const line = require('./line');
 
     bundle.prototype.modelIncludes = {
@@ -61,23 +60,21 @@ module.exports = function (sequelize, DataTypes) {
         'operation': {
             model: operation
         },
-        'cart_pending_operation': {
-            model: cart_pending_operation
-        },
         'line': {
             model: line
         },
     };
     bundle.prototype.getModelIncludes = function () {
-        return ['order', 'operation', 'cart_pending_operation', 'line'];
+        return ['order', 'operation', 'line'];
     };
     bundle.associate = function (models) {
         // associations can be defined here1
         bundle.belongsTo(models.order, {foreignKey: 'OrderId'});
-        bundle.hasMany(models.operation, {foreignKey: 'BundleId'});
-       bundle.belongsToMany(models.line, {
-                through: 'lines_bundles', foreignKey :'BundleId'});
-        bundle.hasOne(models.cart_pending_operation, {foreignKey: 'BundleId'});
+        bundle.belongsToMany(models.line, {
+            through: 'lines_bundles', foreignKey: 'BundleId'
+        });
+
+        bundle.hasMany(models.operation,{foreignKey: 'BundleId'});
 
 
     };

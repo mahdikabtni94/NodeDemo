@@ -188,12 +188,12 @@ class ArticleController extends BaseApiController {
         });
     }
 
-    FindOperationsByLine(res, req, next) {
+    FindOperationsByLine(req, res, next) {
         let fetchedline;
         let operationsFetched = [];
         db.line.findOne({
             include: [{
-                model: db.line,
+                model: db.operation,
             }],
             where: {
                 line_id: req.params.id
@@ -215,7 +215,7 @@ class ArticleController extends BaseApiController {
                 }
             }).then(function (operations_lines) {
                 operations_lines.forEach(operation => {
-                    operationsFetched.push(operations_lines.operation);
+                    operationsFetched.push(operation.operation);
                 });
 
                 res.json({

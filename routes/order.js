@@ -17,6 +17,6 @@ router.delete("/delete/:id", function (req, res, next) {
     OrderControllerinst.delete(req, res, next);
 });
 router.put("/update/:id", function (req, res, next) {
-    OrderControllerinst.update(req, res, next);
+    OrderControllerinst.UpdateOrder(req, res, next);
 });
 module.exports = router;
