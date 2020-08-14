@@ -184,12 +184,12 @@ class OrderController extends BaseApiController {
             }
 
         }).then(order => {
-            console.log('orderrrrrrrrrrrrrr',order);
+            console.log('orderrrrrrrrrrrrrr', order);
             db.order.update({
-                quantity: order.quantity + parseInt(req.body.AddedQuantity),
-            },
+                    quantity: order.quantity + parseInt(req.body.AddedQuantity),
+                },
                 {
-                    where :{
+                    where: {
                         order_code: req.params.id,
                     }
                 }
@@ -200,14 +200,14 @@ class OrderController extends BaseApiController {
                     }
 
                 }).then(article => {
-                    console.log("articleeeeeeeee",article)
+                        console.log("articleeeeeeeee", article)
                         article.setOperation_templates(req.body.operation_templates);
                         article.setLines(req.body.lines);
                     }
                 ));
             if (req.body.lineOperations) {
                 req.body.lineOperations.forEach(function (lineOperation, i) {
-                    console.log('lineeeeeOPPPPPPPP',lineOperation);
+                    console.log('lineeeeeOPPPPPPPP', lineOperation);
                     db.line.findOne({
                             where: {
                                 line_id: lineOperation.line_id,
@@ -218,29 +218,38 @@ class OrderController extends BaseApiController {
                     });
                     if (req.body.bundles) {
                         req.body.bundles.forEach(function (bundle, i) {
-                            console.log('Bundleeeeeeeee',bundle);
-                                db.bundle.create({
-                                    num_bundle: bundle.num_bundle++,
-                                    code: bundle.code,
-                                    version: bundle.version,
-                                    size: bundle.size,
-                                    quantity: Math.floor(parseInt(bundle.quantity) / parseInt(bundle.numOfBundles)),
-                                    OrderId: order.order_id
-                                }).then(CreatedBundle => {
-                                    lineOperation.operationsUpdated.forEach(function (operation, i) {
-                                        console.log('operationcarttttttttt', operation);
-                                        db.cart_pending_operation.create({
-                                            BundleId: CreatedBundle.bundle_id,
-                                            OperationId: operation.operation_id,
-                                            inProgess: 'no',
-                                            finished: 0
-                                        })
+                            console.log('Bundleeeeeeeee', bundle);
+                            db.bundle.create({
+                                num_bundle: bundle.num_bundle++,
+                                code: bundle.code,
+                                version: bundle.version,
+                                size: bundle.size,
+                                quantity: Math.floor(parseInt(bundle.quantity) / parseInt(bundle.numOfBundles)),
+                                OrderId: order.order_id
+                            }).then(CreatedBundle => {
+                                lineOperation.operations.forEach(function (operation, i) {
+                                    console.log('operationcarttttttttt', operation);
+                                    db.cart_pending_operation.create({
+                                        BundleId: CreatedBundle.bundle_id,
+                                        OperationId: operation.operation_id,
+                                        inProgess: 'no',
+                                        finished: 0
                                     });
-                                    console.log('CreatedBundle',CreatedBundle);
-                                    CreatedBundle.setLines(req.body.lines);
-                                    CreatedBundle.setOperations(lineOperation.operationsUpdated);
-                                })
+                                    db.operation.create({
+                                            label: operation.label,
+                                            op_code: operation.op_code,
+                                            description: operation.description,
+                                            MachineTypeId: operation.MachineTypeId,
+                                            time: operation.time,
+                                            accMinPrice: operation.accMinPrice,
+                                            BundleId: CreatedBundle.bundle_id
+                                        },
+                                    )
+                                });
+                                console.log('CreatedBundle', CreatedBundle);
+                                CreatedBundle.setLines(req.body.lines);
                             })
+                        })
                     }
                 })
             }
