@@ -124,18 +124,21 @@ class userController extends BaseApiController {
                                 ProfileId: fetcheduser.profile.profile_id,
                             }
                         }).then(function (permissions) {
-                            const token = jwt.sign(
-                                {
-                                    email: fetcheduser.email,
-                                    userId: fetcheduser.user_id
-                                },
-                                "secret_this_should_be_longer",
-                                {expiresIn: "1h"}
-                            );
                             fetcheduser.permissions = [];
                             permissions.forEach(permission => {
                                 fetcheduser.permissions.push(permission.permission.permission_label);
                             });
+                            const token = jwt.sign(
+                                {
+                                    email: fetcheduser.email,
+                                    userId: fetcheduser.user_id,
+                                    permissions: fetcheduser.permissions,
+                                    profile : fetcheduser.profile,
+                                    Username :fetcheduser.Username
+                                },
+                                "secret_this_should_be_longer",
+                                {expiresIn: "1h"}
+                            );
                             res.json({
                                 message: 'Success',
                                 user: fetcheduser.toJSON(),

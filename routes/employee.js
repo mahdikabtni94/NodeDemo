@@ -44,7 +44,7 @@ router.post("/addElectronic",multer({storage: storage}).single('profile_image'),
     EmployeeControllerinst.addElectronic(req, res, next);
 });
 
-router.delete("/delete/;id", function (req, res, next) {
+router.delete("/delete/:id", function (req, res, next) {
     EmployeeControllerinst.delete(req, res, next);
 });
 router.get("/find", function (req, res, next) {

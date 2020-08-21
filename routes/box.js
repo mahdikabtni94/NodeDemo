@@ -7,6 +7,9 @@ const BoxControllerinst = new BoxController();
 router.post("/add", function (req, res, next) {
     BoxControllerinst.add(req, res, next);
 });
+router.post("/loginBox/:rfid/:source_addr/:box_ip/:box_version", function (req, res, next) {
+    BoxControllerinst.authAction(req, res, next);
+});
 router.get("/find", function (req, res, next) {
     BoxControllerinst.find(req, res, next);
 });

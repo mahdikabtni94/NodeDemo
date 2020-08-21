@@ -67,6 +67,7 @@ module.exports = function (sequelize, DataTypes) {
     );
     const job = require('./job');
     const cart_pending_session = require('./cart_pending_session');
+    const usersession = require('./usersession');
 
     employee.prototype.modelIncludes = {
         'job': {
@@ -75,14 +76,18 @@ module.exports = function (sequelize, DataTypes) {
         'cart_pending_session': {
             model: cart_pending_session
         },
+        'usersession': {
+            model: usersession
+        },
 
     };
     employee.prototype.getModelIncludes = function () {
-        return ['job', 'cart_pending_session'];
+        return ['job', 'cart_pending_session','usersession'];
     };
     employee.associate = function (models) {
         // associations can be defined here
         employee.belongsTo(models.job, {foreignKey: 'JobId'});
+        employee.hasOne(models.usersession,{foreignKey:'EmployeeId'});
         employee.hasMany(models.cart_pending_session, {foreignKey: 'EmployeeId'});
 
     };

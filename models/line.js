@@ -26,6 +26,7 @@ module.exports = function (sequelize, DataTypes) {
     const operation = require('./operation');
     const bundle = require('./bundle');
     const article = require('./articles');
+    const box = require('./box');
     line.prototype.modelIncludes = {
         'site': {
             model: site
@@ -39,11 +40,14 @@ module.exports = function (sequelize, DataTypes) {
         'article': {
             model: article
         },
+        'box': {
+            model: box
+        }
 
 
     };
     line.prototype.getModelIncludes = function () {
-        return ['site', 'operation', 'bundle','article'];
+        return ['site', 'operation', 'bundle', 'article', 'box'];
     };
 
     line.associate = function (models) {
@@ -56,6 +60,7 @@ module.exports = function (sequelize, DataTypes) {
         line.belongsToMany(models.article, {
             through: 'articles_lines', foreignKey: 'LineId'
         });
+        line.hasMany(models.box, {foreignKey: 'LineId'})
 
     };
     return line;

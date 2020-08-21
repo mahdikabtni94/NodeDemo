@@ -6,11 +6,11 @@ module.exports = function (sequelize, DataTypes) {
                 autoIncrement: true,
                 primaryKey: true,
             },
-           box_label: {
+            box_label: {
                 type: DataTypes.STRING,
 
             },
-           address_mac: {
+            address_mac: {
                 type: DataTypes.STRING
             },
             description: {
@@ -19,12 +19,15 @@ module.exports = function (sequelize, DataTypes) {
             version: {
                 type: DataTypes.STRING
             },
+            box_ip: {
+                type: DataTypes.STRING
+            },
 
             MachineId: {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            SiteId: {
+            LineId: {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
@@ -35,22 +38,22 @@ module.exports = function (sequelize, DataTypes) {
         }
     );
     const machine = require('./machine');
-    const site = require('./site');
+    const line = require('./line');
     box.prototype.modelIncludes = {
         'machine': {
             model: machine
         },
-        'site': {
-            model : site
+        'line': {
+            model: line
         }
     };
     box.prototype.getModelIncludes = function () {
-        return ['machine', 'site'];
+        return ['machine', 'line'];
     };
     box.associate = function (models) {
         // associations can be defined here
         box.belongsTo(models.machine, {foreignKey: 'MachineId'});
-        box.belongsTo(models.site, {foreignKey: 'SiteId'});
+        box.belongsTo(models.line, {foreignKey: 'LineId'});
 
     };
     return box;

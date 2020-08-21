@@ -219,8 +219,15 @@ class OrderController extends BaseApiController {
                     if (req.body.bundles) {
                         req.body.bundles.forEach(function (bundle, i) {
                             console.log('Bundleeeeeeeee', bundle);
+                            if(req.body.bundles[i].num_bundle === req.body.bundles[i-1].num_bundle){
+                                req.body.bundles[i].num_bundle++
+                            }
+                            while (req.body.bundles[i].num_bundle < req.body.bundles[i-1].num_bundle) {
+                                req.body.bundles[i].num_bundle++
+                            }
+
                             db.bundle.create({
-                                num_bundle: bundle.num_bundle++,
+                                num_bundle:  req.body.bundles[i].num_bundle,
                                 code: bundle.code,
                                 version: bundle.version,
                                 size: bundle.size,
@@ -229,12 +236,6 @@ class OrderController extends BaseApiController {
                             }).then(CreatedBundle => {
                                 lineOperation.operations.forEach(function (operation, i) {
                                     console.log('operationcarttttttttt', operation);
-                                    db.cart_pending_operation.create({
-                                        BundleId: CreatedBundle.bundle_id,
-                                        OperationId: operation.operation_id,
-                                        inProgess: 'no',
-                                        finished: 0
-                                    });
                                     db.operation.create({
                                             label: operation.label,
                                             op_code: operation.op_code,
@@ -244,7 +245,14 @@ class OrderController extends BaseApiController {
                                             accMinPrice: operation.accMinPrice,
                                             BundleId: CreatedBundle.bundle_id
                                         },
-                                    )
+                                    ).then(operationCreated=>{
+                                        db.cart_pending_operation.create({
+                                            BundleId: CreatedBundle.bundle_id,
+                                            OperationId: operationCreated.operation_id,
+                                            inProgess: 'no',
+                                            finished: 0
+                                        });
+                                    })
                                 });
                                 console.log('CreatedBundle', CreatedBundle);
                                 CreatedBundle.setLines(req.body.lines);

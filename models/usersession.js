@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function (sequelize, DataTypes) {
     const usersession = sequelize.define('usersession', {
-            id: {
+            usersession_id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true,
@@ -14,7 +14,7 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            CartId: {
+            CardId: {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
@@ -55,7 +55,7 @@ module.exports = function (sequelize, DataTypes) {
         // associations can be defined here
         usersession.belongsTo(models.box, {foreignKey: 'BoxId'});
         usersession.belongsTo(models.employee, {foreignKey: 'EmployeeId'});
-        usersession.belongsTo(models.cart_pending_session, {foreignKey: 'CartId'});
+        usersession.belongsTo(models.cart_pending_session, {foreignKey: 'CardId'});
 
 
     };

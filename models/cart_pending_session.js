@@ -54,7 +54,7 @@ module.exports = function (sequelize, DataTypes) {
     cart_pending_session.associate = function (models) {
         // associations can be defined here
         cart_pending_session.belongsTo(models.cart_pending_operation, {foreignKey: 'CartPendingOperationId'});
-        cart_pending_session.hasOne(models.usersession, {foreignKey: 'CartId'});
+        cart_pending_session.hasOne(models.usersession, {foreignKey: 'CardId'});
 
 
     };
