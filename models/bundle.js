@@ -52,6 +52,7 @@ module.exports = function (sequelize, DataTypes) {
     const order = require('./order');
     const operation = require('./operation');
     const line = require('./line');
+    const cart_pending_operation = require ('./cart_pending_operation');
 
     bundle.prototype.modelIncludes = {
         'order': {
@@ -63,9 +64,12 @@ module.exports = function (sequelize, DataTypes) {
         'line': {
             model: line
         },
+        'cart_pending_operation': {
+            model: cart_pending_operation
+        }
     };
     bundle.prototype.getModelIncludes = function () {
-        return ['order', 'operation', 'line'];
+        return ['order', 'operation', 'line','cart_pending_operation'];
     };
     bundle.associate = function (models) {
         // associations can be defined here1
@@ -75,6 +79,7 @@ module.exports = function (sequelize, DataTypes) {
         });
 
         bundle.hasMany(models.operation,{foreignKey: 'BundleId'});
+        bundle.hasMany(models.cart_pending_operation,{foreignKey: 'BundleId'});
 
 
     };

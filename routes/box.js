@@ -7,8 +7,20 @@ const BoxControllerinst = new BoxController();
 router.post("/add", function (req, res, next) {
     BoxControllerinst.add(req, res, next);
 });
-router.post("/loginBox/:rfid/:source_addr/:box_ip/:box_version", function (req, res, next) {
+router.delete("/delete/:id", function (req, res, next) {
+    BoxControllerinst.delete(req, res, next);
+});
+router.post("/loginBox", function (req, res, next) {
     BoxControllerinst.authAction(req, res, next);
+});
+router.get("/logoutBox/:usersession_id", function (req, res, next) {
+    BoxControllerinst.logout(req, res, next);
+});
+router.get("/startOperation", function (req, res, next) {
+    BoxControllerinst.startOperation(req, res, next);
+});
+router.get("/finishOperation", function (req, res, next) {
+    BoxControllerinst.operationFinished(req, res, next);
 });
 router.get("/find", function (req, res, next) {
     BoxControllerinst.find(req, res, next);

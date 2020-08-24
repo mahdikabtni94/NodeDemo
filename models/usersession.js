@@ -14,10 +14,6 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            CardId: {
-                allowNull: true,
-                type: DataTypes.INTEGER
-            },
             time_in: {
                 type: DataTypes.DATE
             },
@@ -55,7 +51,7 @@ module.exports = function (sequelize, DataTypes) {
         // associations can be defined here
         usersession.belongsTo(models.box, {foreignKey: 'BoxId'});
         usersession.belongsTo(models.employee, {foreignKey: 'EmployeeId'});
-        usersession.belongsTo(models.cart_pending_session, {foreignKey: 'CardId'});
+        usersession.hasOne(models.cart_pending_session, {foreignKey: 'UserSessionId'});
 
 
     };

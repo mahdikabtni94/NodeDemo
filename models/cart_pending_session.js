@@ -18,14 +18,33 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            system_quantity: {
+            quantity: {
                 type: DataTypes.INTEGER
             },
+
             start_time: {
                 type: DataTypes.DATE
             },
             end_time: {
                 type: DataTypes.DATE
+            },
+            created_at: {
+                type: DataTypes.DATE
+            },
+            updated_at: {
+                type: DataTypes.DATE
+            },
+            active: {
+                type: DataTypes.STRING,
+                defaultValue: 'Y'
+            },
+            in_progress: {
+                type: DataTypes.STRING,
+                defaultValue: 'N'
+
+            },
+            reparation: {
+                type: DataTypes.INTEGER
             },
 
 
@@ -54,7 +73,7 @@ module.exports = function (sequelize, DataTypes) {
     cart_pending_session.associate = function (models) {
         // associations can be defined here
         cart_pending_session.belongsTo(models.cart_pending_operation, {foreignKey: 'CartPendingOperationId'});
-        cart_pending_session.hasOne(models.usersession, {foreignKey: 'CardId'});
+        cart_pending_session.belongsTo(models.usersession, {foreignKey: 'UserSessionId'});
 
 
     };

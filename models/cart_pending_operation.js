@@ -14,11 +14,30 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
+            MachineId: {
+                allowNull: true,
+                type: DataTypes.INTEGER
+            },
             finished: {
                 type: DataTypes.INTEGER
             },
             inProgess: {
                 type: DataTypes.STRING
+            },
+            quantity: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            },
+            Start_date: {
+                type: DataTypes.DATE,
+                defaultValue: null
+            },
+            Finish_date: {
+                type: DataTypes.DATE,
+                defaultValue: null
+            },
+            reparation: {
+                type: DataTypes.INTEGER
             },
 
 
@@ -29,6 +48,8 @@ module.exports = function (sequelize, DataTypes) {
 
     const operation = require('./operation');
     const bundle = require('./bundle');
+    const cart_pending_session = require('./cart_pending_session');
+    const machine = require('./machine');
     cart_pending_operation.prototype.modelIncludes = {
 
         'operation': {
@@ -36,17 +57,25 @@ module.exports = function (sequelize, DataTypes) {
         },
         'bundle': {
             model: bundle
+        },
+        'cart_pending_session': {
+            model: cart_pending_session
+        },
+        'machine': {
+            model: machine
         }
 
 
     };
     cart_pending_operation.prototype.getModelIncludes = function () {
-        return ['operation', 'bundle'];
+        return ['operation', 'bundle', 'cart_pending_session', 'machine'];
     };
     cart_pending_operation.associate = function (models) {
         // associations can be defined here
         cart_pending_operation.belongsTo(models.operation, {foreignKey: 'OperationId'});
         cart_pending_operation.belongsTo(models.bundle, {foreignKey: 'BundleId'});
+        cart_pending_operation.hasOne(models.cart_pending_session, {foreignKey: 'CartPendingOperationId'});
+        cart_pending_operation.belongsTo(models.machine, {foreignKey: 'MachineId'});
 
 
     };
