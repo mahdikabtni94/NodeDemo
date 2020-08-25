@@ -923,7 +923,96 @@ class BoxController extends BaseApiController {
         });
     }
 
+    dynamicSort(property) {
+        var sortOrder = 1;
+        if (property[0] === '-') {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a, b) {
+            var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+            return result * sortOrder;
+        }
+    }
+    generateSequenceOperation(cartPendingOperations) {
+
+        let _this = this;
+        return new Promise(function (resolve, reject) {
+            let i = 0;
+            let generatedCpoSequences = 0;
+
+            if (cartPendingOperations.length === 0) {
+                resolve([])
+                return;
+            }
+            cartPendingOperations.forEach(function (cartPendingOperation) {
+                cartPendingOperation.operation.sequences = []
+
+                _this.findOperationSequence2(cartPendingOperation).then(resultFinOpSeq => {
+                    cartPendingOperation.operation.sequences = resultFinOpSeq.operation.sequences;
+                    generatedCpoSequences++;
+                    if (generatedCpoSequences >= cartPendingOperations.length) {
+                        resolve(cartPendingOperations);
+                    }
+                })
+
+
+                i++;
+            })
+        })
+    }
+
+
+    findOperationSequence2(cartPendingOperation) {
+        let _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.findOperationSequence(cartPendingOperation.operation).then(operation => {
+
+                cartPendingOperation.operation.sequences = operation.sequences;
+                resolve(cartPendingOperation);
+
+            })
+        })
+    }
+
+    findOperationSequence(operation) {
+        let _this = this;
+
+        return new Promise(function (resolve, reject) {
+
+            //-*************************************************************************************************************
+            _this.db['sequence_operation'].findAll({
+                where: {
+                    OperationId: operation.operation_id
+                },
+                order: [
+                    ['sequence_order', 'ASC']
+                ]
+            }).then(operationSequences => {
+
+
+                operation.sequences = [];
+                let i = 0;
+                operationSequences.forEach(function (s) {
+                    operation.sequences.push(s);
+                    i++;
+
+                    if (i === operationSequences.length) {
+                        resolve(operation)
+                    }
+                });
+                if (operationSequences.length === 0) {
+                    resolve(operation)
+                }
+            })
+
+
+        })
+    }
+
+
 
 }
+
 
 module.exports = BoxController;

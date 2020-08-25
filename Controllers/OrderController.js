@@ -18,9 +18,6 @@ class OrderController extends BaseApiController {
             if (req.body.bundles) {
                 db.bundle.bulkCreate(req.body.bundles, {returning: true}).then(bundles => {
                     bundles.forEach(function (bundle, i) {
-                        console.log('operationGROUp******', bundle);
-                        console.log('articleIddd******', req.body.ArticleId);
-
                         if (req.body.bundles[i].Operations_group) {
                             req.body.bundles[i].Operations_group.forEach(function (operation_group, i) {
                                 if (!lines.includes(operation_group.line_id)) {
@@ -29,11 +26,10 @@ class OrderController extends BaseApiController {
                                 db.operation.bulkCreate(operation_group.operations, {returning: true}).then(operations => {
                                     bundle.setOperations(operations);
                                     operations.forEach(function (operation, i) {
-                                        console.log('operationcarttttttttt', operation);
                                         db.cart_pending_operation.create({
                                             BundleId: bundle.bundle_id,
                                             OperationId: operation.operation_id,
-                                            inProgess: 'no',
+                                            inProgess: 'N',
                                             finished: 0
                                         })
                                     });

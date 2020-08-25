@@ -20,6 +20,7 @@ module.exports = function (sequelize, DataTypes) {
             },
             start_working_date: {
                 type: DataTypes.DATE,
+                defaultValue: null,
 
             },
             last_login_date: {

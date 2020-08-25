@@ -47,6 +47,7 @@ module.exports = function (sequelize, DataTypes) {
     const line = require('./line');
     const bundle = require('./bundle');
     const cart_pending_operation = require ('./cart_pending_operation');
+    const sequence = require('./sequence');
     operation.prototype.modelIncludes = {
 
         'machine_type': {
@@ -60,17 +61,21 @@ module.exports = function (sequelize, DataTypes) {
         },
         'cart_pending_operation':{
             model: cart_pending_operation
+        },
+        'sequence' :{
+            model: sequence
         }
 
 
     };
     operation.prototype.getModelIncludes = function () {
-        return ['machine_type', 'line', 'bundle','cart_pending_operation'];
+        return ['machine_type', 'line', 'bundle','cart_pending_operation','sequence'];
     };
     operation.associate = function (models) {
         // associations can be defined here
         operation.belongsTo(models.machine_type, {foreignKey: 'MachineTypeId'});
         operation.belongsToMany(models.line, {through: 'operations_lines', foreignKey: 'OperationId'});
+        operation.belongsToMany(models.sequence, {through: 'sequence_operation', foreignKey: 'OperationId'});
         operation.belongsTo(models.bundle, {foreignKey: 'BundleId'});
         operation.hasOne(models.cart_pending_operation, {foreignKey: 'OperationId'});
 

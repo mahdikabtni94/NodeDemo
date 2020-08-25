@@ -25,7 +25,13 @@ class EmployeeController extends BaseApiController {
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
-            operator.last_login_date = req.body.last_login_date;
+            if (req.body.last_login_date === 'undefined'){
+                operator.last_login_date = null
+            }
+            else {
+                operator.last_login_date = req.body.last_login_date;
+            }
+
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
             operator.city = req.body.city;
