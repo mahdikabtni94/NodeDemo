@@ -22,6 +22,9 @@ router.get("/startOperation", function (req, res, next) {
 router.get("/finishOperation", function (req, res, next) {
     BoxControllerinst.operationFinished(req, res, next);
 });
+router.get("/listOperation", function (req, res, next) {
+    BoxControllerinst.getOperationList(req, res, next);
+});
 router.get("/find", function (req, res, next) {
     BoxControllerinst.find(req, res, next);
 });

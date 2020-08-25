@@ -946,7 +946,7 @@ class BoxController extends BaseApiController {
                 return;
             }
             cartPendingOperations.forEach(function (cartPendingOperation) {
-                cartPendingOperation.operation.sequences = []
+                cartPendingOperation.operation.sequences = [];
 
                 _this.findOperationSequence2(cartPendingOperation).then(resultFinOpSeq => {
                     cartPendingOperation.operation.sequences = resultFinOpSeq.operation.sequences;
@@ -986,7 +986,7 @@ class BoxController extends BaseApiController {
                     OperationId: operation.operation_id
                 },
                 order: [
-                    ['sequence_order', 'ASC']
+                    ['SequenceId', 'ASC']
                 ]
             }).then(operationSequences => {
 
@@ -1007,6 +1007,201 @@ class BoxController extends BaseApiController {
             })
 
 
+        })
+    }
+    getOperationList(req, res, next) {
+        let _this = this;
+        let usersession_id = req.query.usersession_id;
+        let order_id = req.query.order_id;
+        if ((usersession_id == null) || (usersession_id == '')) {
+            res.send({
+                success: false,
+                data: null,
+                messages: [
+                    {
+                        userMessage: 'User session does not exists',
+                        internalMessage: 'User session does not exists',
+                        code: 1008
+                    }
+                ]
+            });
+            return;
+        }
+
+        if ((order_id == null) || (order_id == '')) {
+            res.send({
+                success: false,
+                data: null,
+                messages: [
+                    {
+                        userMessage: 'Order_ID not provided',
+                        internalMessage: 'Order_ID not provided',
+                        code: 1050
+                    }
+                ]
+            });
+            return;
+        }
+
+
+        _this.db['usersession'].findOne({
+            where: {
+                usersession_id: usersession_id,
+                time_out: null
+
+            },
+            include: [{
+                model: _this.db['box'],
+                include: [{
+                    model: _this.db['machine'],
+                    include: [{
+                        model: _this.db['machine_type']
+                    }]
+                }]
+            }]
+        }).then(usersessions => {
+
+            if (usersessions) {
+                _this.db['box'].findOne({
+                    where: {
+                        box_id: usersessions.BoxId,
+                    }
+                }).then(boxes => {
+
+                        if (boxes) {
+                            _this.db['machine'].findOne({
+                                where: {
+                                    machine_id: boxes.machine_id,
+                                }
+                            }).then(machines => {
+                                if (machines) {
+                                    _this.db['operation_template'].findAll({
+                                        where: {
+                                            MachineTypeId: machines.MachineTypeId,
+                                        }
+                                    })
+                                        .then(machine_operation_templates => {
+                                            if (machine_operation_templates.length > 0) {
+                                                var promise1 = new Promise(function (resolve, reject) {
+                                                    var cpo_result = [];
+                                                    let i = 0;
+                                                    machine_operation_templates.forEach(machine_operation_template_item => {
+                                                        _this.db['cart_pending_operation'].findOne({
+                                                            where: {
+                                                                '$operation.MachineTypeId$': machines.MachineTypeId,
+                                                                finished: 0,
+                                                                '$operation.op_code$': machine_operation_template_item.op_code,
+                                                                in_progress: 'N',
+                                                                '$operation.bundle.OrderId$': order_id,
+                                                            },
+                                                            include: [
+                                                                {
+                                                                    model: _this.db['operation'],
+                                                                    include: [
+                                                                        {
+                                                                            model: _this.db['bundle'],
+                                                                            include: [{
+                                                                                model: _this.db['order'],
+                                                                            }]
+                                                                        }
+                                                                    ]
+                                                                },
+
+                                                            ],
+                                                            order: [
+                                                                ['BundleId', 'ASC']
+                                                            ]
+                                                        }).then(cartPendingOperations => {
+
+                                                            if (cartPendingOperations) {
+                                                                cpo_result.push(cartPendingOperations)
+                                                            }
+                                                            if (i === machine_operation_templates.length - 1) {
+                                                                resolve(cpo_result)
+                                                            }
+                                                            i++
+                                                        })
+                                                        // setTimeout(resolve, 1000, cpo_result);
+                                                    })
+                                                })
+                                                Promise.all([promise1]).then(function (cpo_result) {
+                                                    _this.generateSequenceOperation(cpo_result[0]).then(c => {
+                                                        let cpo = c.sort(_this.dynamicSort('id'));
+                                                        res.send({
+                                                            success: true,
+                                                            data: cpo[0],
+                                                            status: 200
+                                                        });
+                                                    })
+                                                })
+                                            } else {
+                                                res.send({
+                                                    success: false,
+                                                    data: null,
+                                                    status: 500,
+                                                    messages: [
+                                                        {
+                                                            userMessage: "You aren't trained in this machine",
+                                                            internalMessage: "You aren't trained in this machine",
+                                                        }
+                                                    ],
+                                                    code: 1046
+                                                });
+                                            }
+                                        })
+                                } else {
+                                    res.json({
+                                        success: false,
+                                        data: null,
+                                        userMessage: "Machine does not exist",
+                                        attributes: [],
+                                        status: 500,
+                                        messages: [
+                                            {
+                                                userMessage: "Machine does not exist",
+                                                internalMessage: "Machine does not exist",
+                                            }
+                                        ],
+                                        code: 6006
+                                    });
+                                }
+                            })
+                        } else {
+                            res.json({
+                                success: false,
+                                data: null,
+                                userMessage: "Box not exist",
+                                attributes: [],
+                                status: 500,
+                                messages: [
+                                    {
+                                        userMessage: "Box does not exists",
+                                        internalMessage: "Box does not exists",
+                                    }
+                                ],
+                                code: 1041
+                            });
+                        }
+                    }
+                ).catch(err =>
+                    res.status(500).json(err)
+                )
+            } else {
+                res.json({
+                    success: false,
+                    data: null,
+                    userMessage: "User session not exists",
+                    attributes: [],
+                    status: 500,
+                    messages: [
+                        {
+                            userMessage: "User session not exists",
+                            internalMessage: "User session not exists",
+                        }
+                    ],
+                    code: 1008
+                });
+            }
         })
     }
 

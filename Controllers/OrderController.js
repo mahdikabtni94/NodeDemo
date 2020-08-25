@@ -26,6 +26,16 @@ class OrderController extends BaseApiController {
                                 db.operation.bulkCreate(operation_group.operations, {returning: true}).then(operations => {
                                     bundle.setOperations(operations);
                                     operations.forEach(function (operation, i) {
+                                        db.operation_template.findOne({
+                                            where: {
+                                                op_code: operation.op_code
+                                            },
+                                            include :[{
+                                                model: _this.db['sequence'],
+                                            }]
+                                        }).then(operation_template=>{
+                                            operation.setSequences(operation_template.sequence);
+                                        });
                                         db.cart_pending_operation.create({
                                             BundleId: bundle.bundle_id,
                                             OperationId: operation.operation_id,
@@ -242,6 +252,16 @@ class OrderController extends BaseApiController {
                                             BundleId: CreatedBundle.bundle_id
                                         },
                                     ).then(operationCreated=>{
+                                        db.operation_template.findOne({
+                                            where: {
+                                                op_code: operationCreated.op_code
+                                            },
+                                            include :[{
+                                                model: this.db['sequence'],
+                                            }]
+                                        }).then(operation_template=>{
+                                            operationCreated.setSequences(operation_template.sequence);
+                                        });
                                         db.cart_pending_operation.create({
                                             BundleId: CreatedBundle.bundle_id,
                                             OperationId: operationCreated.operation_id,
