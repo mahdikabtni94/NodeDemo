@@ -86,6 +86,7 @@ class BoxController extends BaseApiController {
                 }
             ]
         }).then(user => {
+            console.log("userrrrrrrrrrr",user);
 
                 _this.db['box'].findOne({
                     include: [{
@@ -95,15 +96,13 @@ class BoxController extends BaseApiController {
                         address_mac: addr
                     }
                 }).then(box => {
+                    console.log("boxxxxxxxxxxx",box);
                         if (user && box && box.machine) {
 
                             _this.db['usersession'].findOne({
                                 where:
                                     {
-                                        EmployeeId:
-                                            {
-                                                $eq: user.emp_id
-                                            },
+                                        EmployeeId: user.emp_id,
                                         time_out: null,
                                     },
                                 include: [
@@ -175,6 +174,8 @@ class BoxController extends BaseApiController {
                                         }).then(user_session => {
                                             _this.db['employee'].update({
                                                 last_login_date: rt,
+                                            },
+                                                {
                                                 where: {
                                                     emp_rfid: rfid
 
