@@ -432,21 +432,25 @@ class BoxController extends BaseApiController {
 
                             let allOperationsSQL = 'select count(cpo.*) \n' +
                                 'from cart_pending_operations cpo\n' +
-                                'where cpo.BundleId = ' + cpo.BundleId
+                                'where cpo."BundleId" = :bundle_id'
 
                             _this.db.sequelize.query(allOperationsSQL,
-                                {type: _this.db.sequelize.QueryTypes.SELECT})
+                                {
+                                    type: _this.db.sequelize.QueryTypes.SELECT,
+                                replacements: {
+                                        bundle_id: cpo.BundleId
+                                }})
                                 .then(operationCount => {
-                                    console.log('all operations = ', operationCount[0].count)
+                                    console.log('all operations = ', operationCount[0])
 
                                     let sql = 'select count(cpo.*) \n' +
                                         'from cart_pending_operations cpo\n' +
-                                        'where cpo.BundleId = ' + cpo.BundleId + ' and cpo.Start_date is null'
+                                        'where cpo."BundleId" = ' + cpo.BundleId + ' and cpo."Start_date" is null'
 
                                     _this.db.sequelize.query(sql,
                                         {type: _this.db.sequelize.QueryTypes.SELECT})
                                         .then(cpo_not_started => {
-
+                                            console.log('cpoooooooooooo',cpo_not_started);
                                             if (cpo_not_started[0].count === operationCount[0].count) {
                                                 _this.db['bundle'].update({
                                                     Start_date: new Date(starttime * 1000),
@@ -459,11 +463,13 @@ class BoxController extends BaseApiController {
                                             }
                                         })
 
-                                })
+                                }).catch(err => {
+                                    console.error(err)
+                            })
                             this.db['cart_pending_operation'].update({
                                 inProgess: 'Y',
                                 quantity: 0,
-                                Start_date: new Date(starttime * 1000)
+                                Start_date: starttime
 
                             }, {
                                 where: {
@@ -475,12 +481,12 @@ class BoxController extends BaseApiController {
                         } else {
                             this.db['cart_pending_operation'].update({
                                 inProgess: 'Y',
-                                Start_date: new Date(starttime * 1000)
+                                Start_date: starttime
 
                             }, {
                                 where: {
 
-                                    cart_pending_operation_id: cpo_id,
+                                    id: cpo_id,
                                 }
                             })
                         }
@@ -498,11 +504,11 @@ class BoxController extends BaseApiController {
                             var modalObj = _this.db['cart_pending_session'].build({
                                 UserSessionId: usersession_id,
                                 CartPendingOperationId: cpo_id,
-                                created_at: new Date(starttime * 1000).getTime(),
+                                created_at: starttime,
                                 quantity: 0,
                                 in_progress: 'Y',
                                 active: 'Y',
-                                start_time: new Date(starttime * 1000).getTime()
+                                start_time: starttime
                             });
 
                             modalObj.save()
@@ -673,7 +679,6 @@ class BoxController extends BaseApiController {
                         quantity: total_quantity,
                         finished: 0,
                         time: time,
-                        Finish_date: new Date(endtime * 1000).getTime(),
                         in_progress: 'N'
                     }, {
                         where: {
@@ -692,13 +697,15 @@ class BoxController extends BaseApiController {
 
                             quantity: quantity,
                             time: time,
-                            end_time: new Date(endtime * 1000),
+                            end_time: endtime,
                             in_progress: 'N'
                         }, {
                             where: {
                                 id: cps.id
                             }
                         }).then(cpsUpdated => {
+                            cps.end_time = endtime;
+                            cps.in_progress ='N';
 
                             res.send({
                                 success: true,
@@ -724,7 +731,7 @@ class BoxController extends BaseApiController {
                         quantity: total_quantity,
                         finished: 1,
                         time: time,
-                        Finish_date: new Date(endtime * 1000).getTime(),
+                        Finish_date: endtime,
                         in_progress: 'N'
                     }, {
                         where: {
@@ -741,7 +748,7 @@ class BoxController extends BaseApiController {
                         }).then(cpo => {
 
                             let allOperationSQL = 'select count(cpo.*) from cart_pending_operations cpo ' +
-                                'where cpo.BundleId = ' + cpo.BundleId
+                                'where cpo."BundleId" = ' + cpo.BundleId
 
                             _this.db.sequelize.query(allOperationSQL, {
                                 type: _this.db.sequelize.QueryTypes.SELECT
@@ -749,7 +756,7 @@ class BoxController extends BaseApiController {
                                 .then(count_allOperations => {
 
                                     let allOperationSQL = 'select count(cpo.*) from cart_pending_operations cpo ' +
-                                        'where cpo.BundleId = ' + cpo.BundleId + ' and cpo.finished = 1'
+                                        'where cpo."BundleId" = ' + cpo.BundleId + ' and cpo.finished = 1'
 
                                     _this.db.sequelize.query(allOperationSQL, {
                                         type: _this.db.sequelize.QueryTypes.SELECT
@@ -773,7 +780,7 @@ class BoxController extends BaseApiController {
 
                                                 quantity: quantity,
                                                 time: time,
-                                                end_time: new Date(endtime * 1000).getTime(),
+                                                end_time: endtime,
                                                 in_progress: 'N'
 
                                             }, {
@@ -789,6 +796,8 @@ class BoxController extends BaseApiController {
 
                                                 cps.quantity = quantity;
                                                 cps.time = time;
+                                                cps.in_progress ='N';
+                                                cps.end_time= endtime;
 
 
                                                 res.send({
@@ -814,7 +823,7 @@ class BoxController extends BaseApiController {
 
                 } else {
                     let sql = 'select sum(cps.quantity) as cps_quantity, sum(cps.reparation) as total_reparation from cart_pending_sessions as cps \n ' +
-                        'where cps.CartPendingOperationId = ' + cps.CartPendingOperationId
+                        'where cps."CartPendingOperationId" = ' + cps.CartPendingOperationId
                     _this.db.sequelize.query(sql,
                         {type: _this.db.sequelize.QueryTypes.SELECT})
                         .then(cps_quantity => {
@@ -831,7 +840,7 @@ class BoxController extends BaseApiController {
                                 finished: 1,
                                 in_progress: 'N',
                                 time: time,
-                                Finish_date: new Date(endtime * 1000).getTime()
+                                Finish_date: endtime
                             }, {
                                 where: {
                                     id: cps.cart_pending_operation.id
@@ -847,7 +856,7 @@ class BoxController extends BaseApiController {
                                 }).then(cpo => {
 
                                     let allOperationSQL = 'select count(cpo.*) from cart_pending_operations cpo ' +
-                                        'where cpo.BundleId = ' + cpo.BundleId
+                                        'where cpo."BundleId" = ' + cpo.BundleId
 
                                     _this.db.sequelize.query(allOperationSQL, {
                                         type: _this.db.sequelize.QueryTypes.SELECT
@@ -855,7 +864,7 @@ class BoxController extends BaseApiController {
                                         .then(count_allOperations => {
 
                                             let allOperationSQL = 'select count(cpo.*) from cart_pending_operations cpo ' +
-                                                'where cpo.BundleId = ' + cpo.BundleId + ' and cpo.finished = 1'
+                                                'where cpo."BundleId" = ' + cpo.BundleId + ' and cpo.finished = 1'
 
                                             _this.db.sequelize.query(allOperationSQL, {
                                                 type: _this.db.sequelize.QueryTypes.SELECT
@@ -874,7 +883,7 @@ class BoxController extends BaseApiController {
                                                         quantity: total,
                                                         time: time,
                                                         reparation: reparation,
-                                                        end_time: new Date(endtime * 1000).getTime(),
+                                                        end_time: endtime,
                                                         in_progress: 'N'
 
                                                     }, {
@@ -886,9 +895,11 @@ class BoxController extends BaseApiController {
                                                         cps.cart_pending_operation.quantity = quantity_operation;
                                                         cps.cart_pending_operation.finished = 1;
                                                         cps.cart_pending_operation.time = time;
-                                                        cps.reparation = reparation
+                                                        cps.reparation = reparation;
                                                         cps.quantity = total;
                                                         cps.time = time;
+                                                        cps.in_progress ='N';
+                                                        cps.end_time= endtime;
                                                         res.send({
                                                             success: true,
                                                             data: cps,

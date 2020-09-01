@@ -14,10 +14,7 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: true,
                 type: DataTypes.INTEGER
             },
-            MachineId: {
-                allowNull: true,
-                type: DataTypes.INTEGER
-            },
+
             finished: {
                 type: DataTypes.INTEGER
             },
@@ -39,17 +36,19 @@ module.exports = function (sequelize, DataTypes) {
             reparation: {
                 type: DataTypes.INTEGER
             },
+            time: {
+                type: DataTypes.INTEGER
+            },
 
 
         }, {
-            tableName: 'cart_pending_operations '
+            tableName: 'cart_pending_operations'
         }
     );
 
     const operation = require('./operation');
     const bundle = require('./bundle');
     const cart_pending_session = require('./cart_pending_session');
-    const machine = require('./machine');
     cart_pending_operation.prototype.modelIncludes = {
 
         'operation': {
@@ -61,9 +60,6 @@ module.exports = function (sequelize, DataTypes) {
         'cart_pending_session': {
             model: cart_pending_session
         },
-        'machine': {
-            model: machine
-        }
 
 
     };
@@ -74,8 +70,7 @@ module.exports = function (sequelize, DataTypes) {
         // associations can be defined here
         cart_pending_operation.belongsTo(models.operation, {foreignKey: 'OperationId'});
         cart_pending_operation.belongsTo(models.bundle, {foreignKey: 'BundleId'});
-        cart_pending_operation.hasOne(models.cart_pending_session, {foreignKey: 'CartPendingOperationId'});
-        cart_pending_operation.belongsTo(models.machine, {foreignKey: 'MachineId'});
+        cart_pending_operation.hasMany(models.cart_pending_session, {foreignKey: 'CartPendingOperationId'});
 
 
     };

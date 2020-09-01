@@ -26,15 +26,17 @@ class OrderController extends BaseApiController {
                                 db.operation.bulkCreate(operation_group.operations, {returning: true}).then(operations => {
                                     bundle.setOperations(operations);
                                     operations.forEach(function (operation, i) {
+                                        console.log('operationnnnn',operation);
                                         db.operation_template.findOne({
                                             where: {
                                                 op_code: operation.op_code
                                             },
                                             include :[{
-                                                model: _this.db['sequence'],
+                                                model: db.sequence,
                                             }]
                                         }).then(operation_template=>{
-                                            operation.setSequences(operation_template.sequence);
+                                            console.log('optemplateeeeeeeeee',operation_template)
+                                            operation.setSequences(operation_template.sequences);
                                         });
                                         db.cart_pending_operation.create({
                                             BundleId: bundle.bundle_id,
@@ -225,15 +227,9 @@ class OrderController extends BaseApiController {
                     if (req.body.bundles) {
                         req.body.bundles.forEach(function (bundle, i) {
                             console.log('Bundleeeeeeeee', bundle);
-                            if(req.body.bundles[i].num_bundle === req.body.bundles[i-1].num_bundle){
-                                req.body.bundles[i].num_bundle++
-                            }
-                            while (req.body.bundles[i].num_bundle < req.body.bundles[i-1].num_bundle) {
-                                req.body.bundles[i].num_bundle++
-                            }
 
                             db.bundle.create({
-                                num_bundle:  req.body.bundles[i].num_bundle,
+                                num_bundle:  parseInt(bundle.num_bundle++),
                                 code: bundle.code,
                                 version: bundle.version,
                                 size: bundle.size,
@@ -257,15 +253,15 @@ class OrderController extends BaseApiController {
                                                 op_code: operationCreated.op_code
                                             },
                                             include :[{
-                                                model: this.db['sequence'],
+                                                model: db.sequence,
                                             }]
                                         }).then(operation_template=>{
-                                            operationCreated.setSequences(operation_template.sequence);
+                                            operationCreated.setSequences(operation_template.sequences);
                                         });
                                         db.cart_pending_operation.create({
                                             BundleId: CreatedBundle.bundle_id,
                                             OperationId: operationCreated.operation_id,
-                                            inProgess: 'no',
+                                            inProgess: 'N',
                                             finished: 0
                                         });
                                     })

@@ -45,13 +45,13 @@ module.exports = function (sequelize, DataTypes) {
 
     };
     usersession.prototype.getModelIncludes = function () {
-        return ['operation', 'employee','cart_pending_session'];
+        return ['box', 'employee','cart_pending_session'];
     };
     usersession.associate = function (models) {
         // associations can be defined here
         usersession.belongsTo(models.box, {foreignKey: 'BoxId'});
         usersession.belongsTo(models.employee, {foreignKey: 'EmployeeId'});
-        usersession.hasOne(models.cart_pending_session, {foreignKey: 'UserSessionId'});
+        usersession.hasMany(models.cart_pending_session, {foreignKey: 'UserSessionId'});
 
 
     };
