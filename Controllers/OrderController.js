@@ -13,6 +13,7 @@ class OrderController extends BaseApiController {
         let lines = [];
         let operations = [];
         let Modelinst = db.order.build(req.body);
+        let sequenceList = [];
         let _this = this;
         Modelinst.save().then(CreatedModel => {
             if (req.body.bundles) {
@@ -26,46 +27,65 @@ class OrderController extends BaseApiController {
                                 db.operation.bulkCreate(operation_group.operations, {returning: true}).then(operations => {
                                     bundle.setOperations(operations);
                                     operations.forEach(function (operation, i) {
-                                        console.log('operationnnnn',operation);
+                                        console.log('operationnnnn', operation);
                                         db.operation_template.findOne({
                                             where: {
                                                 op_code: operation.op_code
                                             },
-                                            include :[{
+                                            include: [{
                                                 model: db.sequence,
                                             }]
-                                        }).then(operation_template=>{
-                                            console.log('optemplateeeeeeeeee',operation_template)
-                                            operation.setSequences(operation_template.sequences);
+                                        }).then(operation_template => {
+                                            console.log('operationtempseqqqqqq', operation_template.sequences);
+                                            operation_template.sequences.forEach(function (sequence, i) {
+                                                db.sequence_operation.create({
+                                                    operation_id: operation.operation_id,
+                                                    stitchcount: sequence.stitchcount,
+                                                    sequence_order: sequence.sequence_order,
+                                                    picture: sequence.picture,
+                                                    coupe_fil: sequence.coupe_fil,
+                                                    back_stitch: sequence.back_stitch,
+                                                    back_stitch_positive_tolerence: sequence.back_stitch_positive_tolerence,
+                                                    back_stitch_negative_tolerence: sequence.back_stitch_negative_tolerence,
+                                                    stitch_count_positive_tolerence: sequence.stitch_count_positive_tolerence,
+                                                    stitch_count_negative_tolerence: sequence.stitch_count_negative_tolerence,
+                                                    with_subsequence: sequence.with_subsequence,
+                                                    description: sequence.description,
+                                                    second_back_stitch: sequence.second_back_stitch,
+
+                                                }).then(createdSequence => {
+                                                    sequenceList.push(createdSequence.sequence_operation_id);
+                                                })
+
+                                            });
+                                            operation.setSequence_operations(sequenceList);
                                         });
                                         db.cart_pending_operation.create({
                                             BundleId: bundle.bundle_id,
                                             OperationId: operation.operation_id,
                                             inProgess: 'N',
                                             finished: 0
-                                        })
-                                    });
-                                    db.line.findOne({
-                                        where: {
-                                            line_id: operation_group.line_id
-                                        }
-                                    }).then(line => {
-                                        line.setOperations(operations);
-                                        db.article.findOne({
+                                        });
+                                        db.line.findOne({
                                             where: {
-                                                article_id: req.body.ArticleId
+                                                line_id: operation_group.line_id
                                             }
+                                        }).then(line => {
+                                            line.setOperations(operations);
+                                            db.article.findOne({
+                                                where: {
+                                                    article_id: req.body.ArticleId
+                                                }
 
-                                        }).then(article => {
-                                            console.log("articleeeeee", article);
-                                            line.setArticles(article);
+                                            }).then(article => {
+                                                console.log("articleeeeee", article);
+                                                line.setArticles(article);
+
+                                            });
 
                                         });
-
                                     });
                                 });
-
-
                             });
                         }
 
@@ -183,6 +203,9 @@ class OrderController extends BaseApiController {
     }
 
     UpdateOrder(req, res, next) {
+        let operations = [];
+        let lines =[];
+
         db.order.findOne({
             include: [{
                 model: db.article,
@@ -192,7 +215,6 @@ class OrderController extends BaseApiController {
             }
 
         }).then(order => {
-            console.log('orderrrrrrrrrrrrrr', order);
             db.order.update({
                     quantity: order.quantity + parseInt(req.body.AddedQuantity),
                 },
@@ -208,70 +230,90 @@ class OrderController extends BaseApiController {
                     }
 
                 }).then(article => {
-                        console.log("articleeeeeeeee", article)
                         article.setOperation_templates(req.body.operation_templates);
                         article.setLines(req.body.lines);
                     }
                 ));
             if (req.body.lineOperations) {
                 req.body.lineOperations.forEach(function (lineOperation, i) {
-                    console.log('lineeeeeOPPPPPPPP', lineOperation);
                     db.line.findOne({
                             where: {
                                 line_id: lineOperation.line_id,
                             }
                         }
                     ).then(line => {
-                        line.setOperations(lineOperation.operationsUpdated)
+                        lines.push(line.line_id);
                     });
-                    if (req.body.bundles) {
-                        req.body.bundles.forEach(function (bundle, i) {
-                            console.log('Bundleeeeeeeee', bundle);
-
-                            db.bundle.create({
-                                num_bundle:  parseInt(bundle.num_bundle++),
-                                code: bundle.code,
-                                version: bundle.version,
-                                size: bundle.size,
-                                quantity: Math.floor(parseInt(bundle.quantity) / parseInt(bundle.numOfBundles)),
-                                OrderId: order.order_id
-                            }).then(CreatedBundle => {
-                                lineOperation.operations.forEach(function (operation, i) {
-                                    console.log('operationcarttttttttt', operation);
-                                    db.operation.create({
-                                            label: operation.label,
-                                            op_code: operation.op_code,
-                                            description: operation.description,
-                                            MachineTypeId: operation.MachineTypeId,
-                                            time: operation.time,
-                                            accMinPrice: operation.accMinPrice,
-                                            BundleId: CreatedBundle.bundle_id
-                                        },
-                                    ).then(operationCreated=>{
-                                        db.operation_template.findOne({
-                                            where: {
-                                                op_code: operationCreated.op_code
+                        console.log('lineeeeeOPPPPPPPP', lineOperation);
+                        if (req.body.bundles) {
+                            req.body.bundles.forEach(function (bundle, i) {
+                                console.log('Bundleeeeeeeee', bundle);
+                                db.bundle.create({
+                                    num_bundle: parseInt(bundle.num_bundle++),
+                                    code: bundle.code,
+                                    version: bundle.version,
+                                    size: bundle.size,
+                                    quantity: Math.floor(parseInt(bundle.quantity) / parseInt(bundle.numOfBundles)),
+                                    OrderId: order.order_id
+                                }).then(CreatedBundle => {
+                                    lineOperation.operations.forEach(function (operation, i) {
+                                        console.log('operationcarttttttttt', operation);
+                                        db.operation.create({
+                                                label: operation.label,
+                                                op_code: operation.op_code,
+                                                description: operation.description,
+                                                MachineTypeId: operation.MachineTypeId,
+                                                time: operation.time,
+                                                accMinPrice: operation.accMinPrice,
+                                                BundleId: CreatedBundle.bundle_id
                                             },
-                                            include :[{
-                                                model: db.sequence,
-                                            }]
-                                        }).then(operation_template=>{
-                                            operationCreated.setSequences(operation_template.sequences);
+                                        ).then(operationCreated => {
+                                            operations.push(operationCreated.operation_id);
+                                            db.operation_template.findOne({
+                                                where: {
+                                                    op_code: operationCreated.op_code
+                                                },
+                                                include: [{
+                                                    model: db.sequence,
+                                                }]
+                                            }).then(operation_template => {
+                                                operation_template.sequences.forEach(function (sequence, i) {
+                                                    db.sequence_operation.create({
+                                                        operation_id: operationCreated.operation_id,
+                                                        stitchcount: sequence.stitchcount,
+                                                        sequence_order: sequence.sequence_order,
+                                                        picture: sequence.picture,
+                                                        coupe_fil: sequence.coupe_fil,
+                                                        back_stitch: sequence.back_stitch,
+                                                        back_stitch_positive_tolerence: sequence.back_stitch_positive_tolerence,
+                                                        back_stitch_negative_tolerence: sequence.back_stitch_negative_tolerence,
+                                                        stitch_count_positive_tolerence: sequence.stitch_count_positive_tolerence,
+                                                        stitch_count_negative_tolerence: sequence.stitch_count_negative_tolerence,
+                                                        with_subsequence: sequence.with_subsequence,
+                                                        description: sequence.description,
+                                                        second_back_stitch: sequence.second_back_stitch,
+
+                                                    }).then(createdSequence => {
+                                                    });
+                                                });
+                                            });
+                                            db.cart_pending_operation.create({
+                                                BundleId: CreatedBundle.bundle_id,
+                                                OperationId: operationCreated.operation_id,
+                                                inProgess: 'N',
+                                                finished: 0
+                                            });
+                                            operationCreated.setLines(lines);
                                         });
-                                        db.cart_pending_operation.create({
-                                            BundleId: CreatedBundle.bundle_id,
-                                            OperationId: operationCreated.operation_id,
-                                            inProgess: 'N',
-                                            finished: 0
-                                        });
-                                    })
-                                });
-                                console.log('CreatedBundle', CreatedBundle);
-                                CreatedBundle.setLines(req.body.lines);
+
+                                    });
+                                    console.log('CreatedBundle', CreatedBundle);
+                                    CreatedBundle.setLines(req.body.lines);
+                                })
                             })
-                        })
+                        }
                     }
-                })
+                )
             }
             db.order.findOne({
                 include: [{

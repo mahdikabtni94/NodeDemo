@@ -56,30 +56,25 @@ module.exports = function (sequelize, DataTypes) {
 
 
         }, {
-            tableName: 'sequences '
+            tableName: 'sequences'
         }
     );
     const operation_template = require('./operation_template');
-    const operation = require('./operation');
 
     sequence.prototype.modelIncludes = {
 
         'operation_template': {
             model: operation_template
         },
-        'operation' :{
-            model: operation
-        }
-
 
     };
     sequence.prototype.getModelIncludes = function () {
-        return ['operation_template','operation'];
+        return ['operation_template'];
     };
    sequence.associate = function (models) {
         // associations can be defined here
        sequence.belongsTo(models.operation_template, {foreignKey: 'operation_template_id'});
-       sequence.belongsToMany(models.operation, {through: 'sequence_operation', foreignKey: 'SequenceId'});
+
 
 
 

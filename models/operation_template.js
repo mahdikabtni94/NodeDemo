@@ -35,7 +35,7 @@ module.exports = function (sequelize, DataTypes) {
 
 
         }, {
-            tableName: 'operation_templates '
+            tableName: 'operation_templates'
         }
     );
     const machinetype = require('./machine_type');

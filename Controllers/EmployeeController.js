@@ -25,19 +25,35 @@ class EmployeeController extends BaseApiController {
             operator.emp_lastname = req.body.emp_lastname;
             operator.emp_gender = req.body.emp_gender;
             operator.start_working_date = req.body.start_working_date;
-            if (req.body.last_login_date === 'undefined'){
+            if (req.body.last_login_date === 'undefined') {
                 operator.last_login_date = null
-            }
-            else {
+            } else {
                 operator.last_login_date = req.body.last_login_date;
             }
 
             operator.emp_address = req.body.emp_address;
             operator.emp_rfid = req.body.emp_rfid;
-            operator.city = req.body.city;
+            if (req.body.city === 'undefined') {
+                operator.city = null
+            } else {
+                operator.city = req.body.city;
+            }
             operator.emp_age = req.body.emp_age;
-            operator.emp_matricule = req.body.emp_matricule;
-            operator.status = req.body.status;
+            if (req.body.emp_matricule === 'undefined') {
+                operator.emp_matricule = null
+            } else {
+                operator.emp_matricule = req.body.emp_matricule;
+            }
+            if (req.body.last_login_date === 'undefined') {
+                operator.last_login_date = null
+            } else {
+                operator.last_login_date = req.body.last_login_date;
+            }
+            if (req.body.status === 'undefined') {
+                operator.status = null
+            } else {
+                operator.status = req.body.status;
+            }
             operator.email = req.body.email;
             operator.profile_image = imageURL.url;
             operator.JobId = job.job_id;
@@ -77,7 +93,7 @@ class EmployeeController extends BaseApiController {
                 res.status(500).json(err)
             )
 
-    })
+        })
     }
 
     addSupervisor(req, res, next) {
@@ -347,6 +363,7 @@ class EmployeeController extends BaseApiController {
         )
 
     }
+
     findElectronics(req, res, next) {
 
         if (!this.db[this.baseModel]) {
@@ -397,6 +414,7 @@ class EmployeeController extends BaseApiController {
         )
 
     }
+
     UpdateEmployee(req, res, next) {
         const where = {};
         let imagePath = req.body.profile_image;
@@ -416,7 +434,7 @@ class EmployeeController extends BaseApiController {
                 emp_rfid: req.body.emp_rfid,
                 profile_image: imagePath.url,
                 city: req.body.city,
-                emp_age: req.body. emp_age,
+                emp_age: req.body.emp_age,
                 emp_matricule: req.body.emp_matricule,
                 status: req.body.status,
                 email: req.body.email

@@ -86,7 +86,7 @@ class BoxController extends BaseApiController {
                 }
             ]
         }).then(user => {
-            console.log("userrrrrrrrrrr",user);
+                console.log("userrrrrrrrrrr", user);
 
                 _this.db['box'].findOne({
                     include: [{
@@ -96,7 +96,7 @@ class BoxController extends BaseApiController {
                         address_mac: addr
                     }
                 }).then(box => {
-                    console.log("boxxxxxxxxxxx",box);
+                        console.log("boxxxxxxxxxxx", box);
                         if (user && box && box.machine) {
 
                             _this.db['usersession'].findOne({
@@ -173,19 +173,19 @@ class BoxController extends BaseApiController {
                                             ]
                                         }).then(user_session => {
                                             _this.db['employee'].update({
-                                                last_login_date: rt,
-                                            },
-                                                {
-                                                where: {
-                                                    emp_rfid: rfid
-
+                                                    last_login_date: rt,
                                                 },
-                                                include: [
-                                                    {
-                                                        model: db['job']
-                                                    }
-                                                ]
-                                            });
+                                                {
+                                                    where: {
+                                                        emp_rfid: rfid
+
+                                                    },
+                                                    include: [
+                                                        {
+                                                            model: db['job']
+                                                        }
+                                                    ]
+                                                });
                                             res.send({
                                                 message: 'Employee is connected',
                                                 success: true,
@@ -437,23 +437,29 @@ class BoxController extends BaseApiController {
                             _this.db.sequelize.query(allOperationsSQL,
                                 {
                                     type: _this.db.sequelize.QueryTypes.SELECT,
-                                replacements: {
+                                    replacements: {
                                         bundle_id: cpo.BundleId
-                                }})
+                                    }
+                                })
                                 .then(operationCount => {
                                     console.log('all operations = ', operationCount[0])
 
                                     let sql = 'select count(cpo.*) \n' +
                                         'from cart_pending_operations cpo\n' +
-                                        'where cpo."BundleId" = ' + cpo.BundleId + ' and cpo."Start_date" is null'
+                                        'where cpo."BundleId" = :bundle_id and "Start_date" is  null'
 
                                     _this.db.sequelize.query(sql,
-                                        {type: _this.db.sequelize.QueryTypes.SELECT})
+                                        {
+                                            type: _this.db.sequelize.QueryTypes.SELECT,
+                                            replacements: {
+                                                bundle_id: cpo.BundleId
+                                            }
+                                        })
                                         .then(cpo_not_started => {
-                                            console.log('cpoooooooooooo',cpo_not_started);
+                                            console.log('cpoooooooooooo', cpo_not_started);
                                             if (cpo_not_started[0].count === operationCount[0].count) {
                                                 _this.db['bundle'].update({
-                                                    Start_date: new Date(starttime * 1000),
+                                                    Start_date: starttime,
 
                                                 }, {
                                                     where: {
@@ -464,8 +470,8 @@ class BoxController extends BaseApiController {
                                         })
 
                                 }).catch(err => {
-                                    console.error(err)
-                            })
+                                console.error(err)
+                            });
                             this.db['cart_pending_operation'].update({
                                 inProgess: 'Y',
                                 quantity: 0,
@@ -679,7 +685,7 @@ class BoxController extends BaseApiController {
                         quantity: total_quantity,
                         finished: 0,
                         time: time,
-                        in_progress: 'N'
+                        inProgess: 'N'
                     }, {
                         where: {
                             id: cps.cart_pending_operation.id,
@@ -705,7 +711,7 @@ class BoxController extends BaseApiController {
                             }
                         }).then(cpsUpdated => {
                             cps.end_time = endtime;
-                            cps.in_progress ='N';
+                            cps.in_progress = 'N';
 
                             res.send({
                                 success: true,
@@ -732,7 +738,7 @@ class BoxController extends BaseApiController {
                         finished: 1,
                         time: time,
                         Finish_date: endtime,
-                        in_progress: 'N'
+                        inProgess: 'N'
                     }, {
                         where: {
                             id: cps.cart_pending_operation.id
@@ -754,6 +760,7 @@ class BoxController extends BaseApiController {
                                 type: _this.db.sequelize.QueryTypes.SELECT
                             })
                                 .then(count_allOperations => {
+                                    console.log('all operationssssss', count_allOperations[0]);
 
                                     let allOperationSQL = 'select count(cpo.*) from cart_pending_operations cpo ' +
                                         'where cpo."BundleId" = ' + cpo.BundleId + ' and cpo.finished = 1'
@@ -762,7 +769,7 @@ class BoxController extends BaseApiController {
                                         type: _this.db.sequelize.QueryTypes.SELECT
                                     })
                                         .then(finished_operations_count => {
-
+                                            console.log('finishedopsssssssssss', finished_operations_count[0]);
                                             if (count_allOperations[0].count === finished_operations_count[0].count) {
 
                                                 _this.db['bundle'].update({
@@ -796,8 +803,8 @@ class BoxController extends BaseApiController {
 
                                                 cps.quantity = quantity;
                                                 cps.time = time;
-                                                cps.in_progress ='N';
-                                                cps.end_time= endtime;
+                                                cps.in_progress = 'N';
+                                                cps.end_time = endtime;
 
 
                                                 res.send({
@@ -838,7 +845,7 @@ class BoxController extends BaseApiController {
                                 reparation: cpo_reparation + reparation,
                                 quantity: quantity_operation,
                                 finished: 1,
-                                in_progress: 'N',
+                                inProgess: 'N',
                                 time: time,
                                 Finish_date: endtime
                             }, {
@@ -898,8 +905,8 @@ class BoxController extends BaseApiController {
                                                         cps.reparation = reparation;
                                                         cps.quantity = total;
                                                         cps.time = time;
-                                                        cps.in_progress ='N';
-                                                        cps.end_time= endtime;
+                                                        cps.in_progress = 'N';
+                                                        cps.end_time = endtime;
                                                         res.send({
                                                             success: true,
                                                             data: cps,
@@ -946,6 +953,7 @@ class BoxController extends BaseApiController {
             return result * sortOrder;
         }
     }
+
     generateSequenceOperation(cartPendingOperations) {
 
         let _this = this;
@@ -958,17 +966,16 @@ class BoxController extends BaseApiController {
                 return;
             }
             cartPendingOperations.forEach(function (cartPendingOperation) {
-                cartPendingOperation.operation.sequences = [];
+                console.log('cartPendingOPPPPPPPP', cartPendingOperation);
+                cartPendingOperation.operation.sequence_operations = [];
 
                 _this.findOperationSequence2(cartPendingOperation).then(resultFinOpSeq => {
-                    cartPendingOperation.operation.sequences = resultFinOpSeq.operation.sequences;
+                    cartPendingOperation.operation.sequence_operations = resultFinOpSeq.operation.sequence_operations;
                     generatedCpoSequences++;
                     if (generatedCpoSequences >= cartPendingOperations.length) {
                         resolve(cartPendingOperations);
                     }
-                })
-
-
+                });
                 i++;
             })
         })
@@ -979,8 +986,7 @@ class BoxController extends BaseApiController {
         let _this = this;
         return new Promise(function (resolve, reject) {
             _this.findOperationSequence(cartPendingOperation.operation).then(operation => {
-
-                cartPendingOperation.operation.sequences = operation.sequences;
+                cartPendingOperation.operation.sequence_operations = operation.sequence_operations;
                 resolve(cartPendingOperation);
 
             })
@@ -995,18 +1001,16 @@ class BoxController extends BaseApiController {
             //-*************************************************************************************************************
             _this.db['sequence_operation'].findAll({
                 where: {
-                    OperationId: operation.operation_id
+                    operation_id: operation.operation_id
                 },
                 order: [
-                    ['SequenceId', 'ASC']
+                    ['sequence_order', 'ASC']
                 ]
             }).then(operationSequences => {
-
-
-                operation.sequences = [];
+                operation.sequence_operations = [];
                 let i = 0;
                 operationSequences.forEach(function (s) {
-                    operation.sequences.push(s);
+                    operation.sequence_operations.push(s);
                     i++;
 
                     if (i === operationSequences.length) {
@@ -1021,6 +1025,7 @@ class BoxController extends BaseApiController {
 
         })
     }
+
     getOperationList(req, res, next) {
         let _this = this;
         let usersession_id = req.query.usersession_id;
@@ -1083,14 +1088,19 @@ class BoxController extends BaseApiController {
                         if (boxes) {
                             _this.db['machine'].findOne({
                                 where: {
-                                    machine_id: boxes.machine_id,
+                                    machine_id: boxes.MachineId,
                                 }
                             }).then(machines => {
                                 if (machines) {
-                                    _this.db['operation_template'].findAll({
+                                    _this.db['machine_operation_template'].findAll({
                                         where: {
-                                            MachineTypeId: machines.MachineTypeId,
-                                        }
+                                            MachineId: machines.machine_id,
+                                        },
+                                        include:[
+                                            {
+                                                model: this.db['operation_template']
+                                            }
+                                        ]
                                     })
                                         .then(machine_operation_templates => {
                                             if (machine_operation_templates.length > 0) {
@@ -1098,12 +1108,13 @@ class BoxController extends BaseApiController {
                                                     var cpo_result = [];
                                                     let i = 0;
                                                     machine_operation_templates.forEach(machine_operation_template_item => {
-                                                        _this.db['cart_pending_operation'].findOne({
+                                                        console.log('machineeeeeop',machine_operation_template_item);
+                                                        _this.db['cart_pending_operation'].findAll({
                                                             where: {
                                                                 '$operation.MachineTypeId$': machines.MachineTypeId,
                                                                 finished: 0,
-                                                                '$operation.op_code$': machine_operation_template_item.op_code,
-                                                                in_progress: 'N',
+                                                                '$operation.op_code$': machine_operation_template_item.operation_template.op_code,
+                                                                inProgess: 'N',
                                                                 '$operation.bundle.OrderId$': order_id,
                                                             },
                                                             include: [
@@ -1115,7 +1126,8 @@ class BoxController extends BaseApiController {
                                                                             include: [{
                                                                                 model: _this.db['order'],
                                                                             }]
-                                                                        }
+                                                                        },
+
                                                                     ]
                                                                 },
 
@@ -1124,7 +1136,7 @@ class BoxController extends BaseApiController {
                                                                 ['BundleId', 'ASC']
                                                             ]
                                                         }).then(cartPendingOperations => {
-
+                                                            console.log('cartopppppppppppp', cartPendingOperations);
                                                             if (cartPendingOperations) {
                                                                 cpo_result.push(cartPendingOperations)
                                                             }
@@ -1134,9 +1146,10 @@ class BoxController extends BaseApiController {
                                                             i++
                                                         })
                                                         // setTimeout(resolve, 1000, cpo_result);
-                                                    })
-                                                })
+                                                    });
+                                                });
                                                 Promise.all([promise1]).then(function (cpo_result) {
+                                                    console.log('cpoooooooooo',cpo_result[0]);
                                                     _this.generateSequenceOperation(cpo_result[0]).then(c => {
                                                         let cpo = c.sort(_this.dynamicSort('id'));
                                                         res.send({
@@ -1216,7 +1229,6 @@ class BoxController extends BaseApiController {
             }
         })
     }
-
 
 
 }
