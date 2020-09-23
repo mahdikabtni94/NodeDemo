@@ -444,7 +444,7 @@ class BoxController extends BaseApiController {
                                 .then(operationCount => {
                                     console.log('all operations = ', operationCount[0])
 
-                                    let sql = 'select count(cpo.*) \n' +
+                                    let sql = 'select count(*) \n' +
                                         'from cart_pending_operations cpo\n' +
                                         'where cpo."BundleId" = :bundle_id and "Start_date" is  null'
 
@@ -468,22 +468,23 @@ class BoxController extends BaseApiController {
                                                 })
                                             }
                                         })
+                                    this.db['cart_pending_operation'].update({
+                                        inProgess: 'Y',
+                                        quantity: 0,
+                                        Start_date: starttime
+
+                                    }, {
+                                        where: {
+
+                                            id: cpo_id,
+
+                                        }
+                                    })
 
                                 }).catch(err => {
                                 console.error(err)
                             });
-                            this.db['cart_pending_operation'].update({
-                                inProgess: 'Y',
-                                quantity: 0,
-                                Start_date: starttime
 
-                            }, {
-                                where: {
-
-                                    id: cpo_id,
-
-                                }
-                            })
                         } else {
                             this.db['cart_pending_operation'].update({
                                 inProgess: 'Y',
@@ -664,10 +665,9 @@ class BoxController extends BaseApiController {
                 }]
         }).then(cps => {
             if (cps) {
-
-
                 var cps = cps;
                 var quantity_operation = cps.cart_pending_operation.operation.quantity;
+                var oldtime = cps.cart_pending_operation.time;
 
                 if (cps.cart_pending_operation.quantity === '' || cps.cart_pending_operation.quantity === null) {
                     var quantity_CPO = 0;
@@ -677,6 +677,8 @@ class BoxController extends BaseApiController {
                 var total_quantity = 0;
                 total_quantity = parseInt(quantity_CPO) + parseInt(quantity);
                 time = parseInt((cps.cart_pending_operation.time) ? cps.cart_pending_operation.time : 0) + parseInt(time);
+                var total_time =0;
+                total_time = parseInt(oldtime)+ time;
 
 
                 if (quantity < quantity_operation && total_quantity < quantity_operation) {
@@ -684,7 +686,7 @@ class BoxController extends BaseApiController {
                     _this.db['cart_pending_operation'].update({
                         quantity: total_quantity,
                         finished: 0,
-                        time: time,
+                        time: total_time,
                         inProgess: 'N'
                     }, {
                         where: {
@@ -693,14 +695,13 @@ class BoxController extends BaseApiController {
                     }).then(cpo_updated => {
                         cps.cart_pending_operation.quantity = total_quantity;
                         cps.cart_pending_operation.finished = 0;
-                        cps.cart_pending_operation.time = time;
-
+                        cps.cart_pending_operation.time = total_time;
+                        cps.cart_pending_operation.inProgess =cpo_updated.inProgess;
                         cps.quantity = quantity;
                         cps.time = time;
 
 
                         _this.db['cart_pending_session'].update({
-
                             quantity: quantity,
                             time: time,
                             end_time: endtime,
@@ -960,25 +961,45 @@ class BoxController extends BaseApiController {
         return new Promise(function (resolve, reject) {
             let i = 0;
             let generatedCpoSequences = 0;
+            console.log('cpooooooow',cartPendingOperations);
 
             if (cartPendingOperations.length === 0) {
                 resolve([])
                 return;
             }
-            cartPendingOperations.forEach(function (cartPendingOperation) {
-                console.log('cartPendingOPPPPPPPP', cartPendingOperation);
-                cartPendingOperation.operation.sequence_operations = [];
 
-                _this.findOperationSequence2(cartPendingOperation).then(resultFinOpSeq => {
-                    cartPendingOperation.operation.sequence_operations = resultFinOpSeq.operation.sequence_operations;
-                    generatedCpoSequences++;
-                    if (generatedCpoSequences >= cartPendingOperations.length) {
-                        resolve(cartPendingOperations);
-                    }
-                });
-                i++;
+            let promise = [];
+            cartPendingOperations.forEach(function (cartPendingOperation) {
+                cartPendingOperation.operation.sequences= [];
+                promise.push(new Promise(function (resolve, reject) {
+                    _this.findOperationSequence2(cartPendingOperation).then(resultFinOpSeq => {
+
+                        cartPendingOperation.operation.sequences = resultFinOpSeq.operation.sequences;
+                        resolve(cartPendingOperation)
+                        // generatedCpoSequences++;
+                        // if (generatedCpoSequences >= cartPendingOperation.length) {
+                        //
+                        //     console.log('seqqqqq', resultFinOpSeq)
+                        //
+                        //     resolve(cartPendingOperation);
+                        // }
+                    });
+                }))
+               // console.log('cartPendingOPPPPPPPP', cartPendingOperation);
+
+                //    console.log('newcpooo',cpo);
+
+
+
+
+                })
+
+            Promise.all(promise).then(data => {
+                resolve(data)
             })
-        })
+
+            })
+
     }
 
 
@@ -986,7 +1007,7 @@ class BoxController extends BaseApiController {
         let _this = this;
         return new Promise(function (resolve, reject) {
             _this.findOperationSequence(cartPendingOperation.operation).then(operation => {
-                cartPendingOperation.operation.sequence_operations = operation.sequence_operations;
+                cartPendingOperation.operation.sequences = operation.sequences;
                 resolve(cartPendingOperation);
 
             })
@@ -1007,17 +1028,20 @@ class BoxController extends BaseApiController {
                     ['sequence_order', 'ASC']
                 ]
             }).then(operationSequences => {
-                operation.sequence_operations = [];
+                operation.sequences = [];
                 let i = 0;
-                operationSequences.forEach(function (s) {
-                    operation.sequence_operations.push(s);
-                    i++;
 
+                operationSequences.forEach(function (s) {
+                    operation.sequences.push(s);
+                    i++;
                     if (i === operationSequences.length) {
+
                         resolve(operation)
                     }
+
                 });
                 if (operationSequences.length === 0) {
+
                     resolve(operation)
                 }
             })
@@ -1092,6 +1116,7 @@ class BoxController extends BaseApiController {
                                 }
                             }).then(machines => {
                                 if (machines) {
+
                                     _this.db['machine_operation_template'].findAll({
                                         where: {
                                             MachineId: machines.machine_id,
@@ -1101,15 +1126,14 @@ class BoxController extends BaseApiController {
                                                 model: this.db['operation_template']
                                             }
                                         ]
-                                    })
-                                        .then(machine_operation_templates => {
+                                    }).then(machine_operation_templates => {
+                                        console.log('machineeeeee',machine_operation_templates.length);
                                             if (machine_operation_templates.length > 0) {
                                                 var promise1 = new Promise(function (resolve, reject) {
                                                     var cpo_result = [];
                                                     let i = 0;
                                                     machine_operation_templates.forEach(machine_operation_template_item => {
-                                                        console.log('machineeeeeop',machine_operation_template_item);
-                                                        _this.db['cart_pending_operation'].findAll({
+                                                        _this.db['cart_pending_operation'].findOne({
                                                             where: {
                                                                 '$operation.MachineTypeId$': machines.MachineTypeId,
                                                                 finished: 0,
@@ -1125,7 +1149,9 @@ class BoxController extends BaseApiController {
                                                                             model: _this.db['bundle'],
                                                                             include: [{
                                                                                 model: _this.db['order'],
-                                                                            }]
+                                                                            }],
+
+
                                                                         },
 
                                                                     ]
@@ -1136,7 +1162,7 @@ class BoxController extends BaseApiController {
                                                                 ['BundleId', 'ASC']
                                                             ]
                                                         }).then(cartPendingOperations => {
-                                                            console.log('cartopppppppppppp', cartPendingOperations);
+                                                         //   console.log('cartopppppppppppp', cartPendingOperations);
                                                             if (cartPendingOperations) {
                                                                 cpo_result.push(cartPendingOperations)
                                                             }
@@ -1149,12 +1175,14 @@ class BoxController extends BaseApiController {
                                                     });
                                                 });
                                                 Promise.all([promise1]).then(function (cpo_result) {
-                                                    console.log('cpoooooooooo',cpo_result[0]);
+
                                                     _this.generateSequenceOperation(cpo_result[0]).then(c => {
-                                                        let cpo = c.sort(_this.dynamicSort('id'));
+                                                        console.log('cccccccc', c )
+                                                       let cpo = c.sort(_this.dynamicSort('id'));
+                                                     //   console.log('cpoooooooooo',cpo);
                                                         res.send({
                                                             success: true,
-                                                            data: cpo[0],
+                                                            data: cpo,
                                                             status: 200
                                                         });
                                                     })
@@ -1228,6 +1256,106 @@ class BoxController extends BaseApiController {
                 });
             }
         })
+    }
+    global_productivity(req, res, next) {
+        let db = require('../models');
+        let sql = 'SELECT count(vesd.*) AS total_employees,\n' +
+            '    l.line_label,\n' +
+            '    l.line_id,\n' +
+            '    vesd.day_session,\n' +
+            '    sum(vesd.productivity) / count(vesd.*)::double precision AS global_productivity\n' +
+            '   FROM views_employee_stats_by_day_hour_line vesd\n' +
+            '     LEFT JOIN lines l ON l.line_id = vesd."LineId"\n' +
+            '  GROUP BY vesd.day_session, l.line_label, l.line_id;'
+        db.sequelize.query(sql,
+            {type: db.sequelize.QueryTypes.SELECT})
+            .then(data => {
+                res.send({
+                    success: true,
+                    data: data
+                })
+            })
+    }
+    employeeStats(req,res,next){
+        let db = require('../models');
+        let sql = '  SELECT vussd."EmployeeId",\n' +
+            '    vussd.day_session,\n' +
+            '    vussd.date_hour,\n' +
+            '    vussd.session_status,\n' +
+            '    vussd.time_first_login,\n' +
+            '    vussd.time_last_logout,\n' +
+            '    vussd.total_time_passed,\n' +
+            '    vussd.total_time_passed_from_now,\n' +
+            '    vussd.lines_ids,\n' +
+            '    vussd.boxs_ids,\n' +
+            '    vcpsded.total_quantity,\n' +
+            '    vcpsded.total_time_passed AS operation_total_time_passed,\n' +
+            '    vcpsded.total_time_needed AS operation_total_time_needed,\n' +
+            '    vcpsded.total_efficiency,\n' +
+            '    vcpsded.total_time_needed /\n' +
+            '        CASE\n' +
+            '            WHEN vussd.time_last_logout IS NULL THEN vussd.total_time_passed_from_now::double precision\n' +
+            '            ELSE vcpsded.total_time_passed::double precision\n' +
+            '        END * 100::double precision AS productivity,\n' +
+            '    vussd.lines_ids AS list_lines_ids,\n' +
+            '    vussd.boxs_ids AS list_boxs_ids,\n' +
+            '    vussd."LineId",\n' +
+            '    vcpsded.emp_matricule,\n' +
+            '    vcpsded.emp_name,\n' +
+            '    vcpsded.emp_lastname,\n' +
+            '    vcpsded.profile_image\n' +
+            '   FROM views_user_sessions_status_by_day_hour_line vussd\n' +
+            '     LEFT JOIN views_cps_data_by_employee_by_day vcpsded ON vcpsded."EmployeeId" = vussd."EmployeeId" AND vcpsded.date_operation = vussd.day_session\n' +
+            '  ORDER BY vussd.day_session DESC;'
+        db.sequelize.query(sql,
+            {type: db.sequelize.QueryTypes.SELECT})
+            .then(data => {
+                res.send({
+                    success: true,
+                    data: data
+                })
+            })
+
+    }
+    cpsStatsByemployee(req,res,next){
+        let db = require('../models');
+        let sql = ' SELECT cps.id,\n' +
+            '    cps."CartPendingOperationId",\n' +
+            '    cps."UserSessionId",\n' +
+            '    us."EmployeeId",\n' +
+            '    to_char(cps.end_time::date::timestamp without time zone, \'yyyymmdd\'::text) AS date_operation,\n' +
+            '    concat(to_char(cps.end_time::date::timestamp without time zone, \'yyyymmdd\'::text), to_char(cps.end_time::time without time zone::interval, \'HH24\'::text)) AS date_hour_operation,\n' +
+            '    cps.quantity,\n' +
+            '    cps.start_time,\n' +
+            '    cps.end_time,\n' +
+            '    cps.reparation,\n' +
+            '    (date_part(\'epoch\'::text, cps.end_time) - date_part(\'epoch\'::text, cps.start_time))::real::integer AS time_passed,\n' +
+            '    op.quantity AS total_quantity_needed,\n' +
+            '    op."time"::double precision * 60::double precision AS time_needed_by_item,\n' +
+            '    op."time"::double precision * 60::double precision * cps.quantity::double precision AS total_time_needed,\n' +
+            '        CASE\n' +
+            '            WHEN cps.end_time <= cps.start_time THEN 0::double precision\n' +
+            '            ELSE op."time"::double precision * 60::double precision * cps.quantity::double precision / (date_part(\'epoch\'::text, cps.end_time) - date_part(\'epoch\'::text, cps.start_time))::real::integer::double precision * 100::double precision\n' +
+            '        END AS efficiency,\n' +
+            '    bx.box_id,\n' +
+            '    bx."LineId",\n' +
+            '    op.label AS operation_label\n' +
+            '   FROM "cart_pending_sessions " cps\n' +
+            '     LEFT JOIN cart_pending_operations cpo ON cpo.id = cps."CartPendingOperationId"\n' +
+            '     LEFT JOIN operations op ON op.operation_id = cpo."OperationId"\n' +
+            '     LEFT JOIN "usersessions " us ON us.usersession_id = cps."UserSessionId"\n' +
+            '     LEFT JOIN boxs bx ON bx.box_id = us."BoxId"\n' +
+            '  WHERE cps.start_time IS NOT NULL AND cps.end_time IS NOT NULL AND cps.active::text = \'Y\'::text AND cps.quantity > 0\n' +
+            '  ORDER BY cps.end_time DESC;'
+        db.sequelize.query(sql,
+            {type: db.sequelize.QueryTypes.SELECT})
+            .then(data => {
+                res.send({
+                    success: true,
+                    data: data
+                })
+            })
+
     }
 
 

@@ -204,7 +204,7 @@ class OrderController extends BaseApiController {
 
     UpdateOrder(req, res, next) {
         let operations = [];
-        let lines =[];
+        let lines = [];
 
         db.order.findOne({
             include: [{
@@ -236,14 +236,14 @@ class OrderController extends BaseApiController {
                 ));
             if (req.body.lineOperations) {
                 req.body.lineOperations.forEach(function (lineOperation, i) {
-                    db.line.findOne({
-                            where: {
-                                line_id: lineOperation.line_id,
+                        db.line.findOne({
+                                where: {
+                                    line_id: lineOperation.line_id,
+                                }
                             }
-                        }
-                    ).then(line => {
-                        lines.push(line.line_id);
-                    });
+                        ).then(line => {
+                            lines.push(line.line_id);
+                        });
                         console.log('lineeeeeOPPPPPPPP', lineOperation);
                         if (req.body.bundles) {
                             req.body.bundles.forEach(function (bundle, i) {
@@ -265,7 +265,8 @@ class OrderController extends BaseApiController {
                                                 MachineTypeId: operation.MachineTypeId,
                                                 time: operation.time,
                                                 accMinPrice: operation.accMinPrice,
-                                                BundleId: CreatedBundle.bundle_id
+                                                BundleId: CreatedBundle.bundle_id,
+                                                quantity: CreatedBundle.quantity,
                                             },
                                         ).then(operationCreated => {
                                             operations.push(operationCreated.operation_id);

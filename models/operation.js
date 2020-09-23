@@ -23,11 +23,11 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.INTEGER
             },
             time: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
 
             },
             accMinPrice: {
-                type: DataTypes.STRING
+                type: DataTypes.INTEGER,
             },
             BundleId: {
                 allowNull: true,
@@ -36,7 +36,8 @@ module.exports = function (sequelize, DataTypes) {
             quantity: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
-            }
+            },
+        sequences: DataTypes.VIRTUAL
 
 
         }, {

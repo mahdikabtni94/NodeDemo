@@ -41,6 +41,7 @@ module.exports = function (sequelize, DataTypes) {
             },
 
 
+
         }, {
             tableName: 'cart_pending_operations'
         }

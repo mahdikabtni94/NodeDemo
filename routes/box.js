@@ -34,4 +34,13 @@ router.put("/update/:id", function (req, res, next) {
 router.get("/find/:id", function (req, res, next) {
     BoxControllerinst.get(req, res, next);
 });
+router.get("/global_productivity", function (req, res, next) {
+    BoxControllerinst.global_productivity(req, res, next);
+});
+router.get("/employeeStats", function (req, res, next) {
+    BoxControllerinst.employeeStats(req, res, next);
+});
+router.get("/cpsStats", function (req, res, next) {
+    BoxControllerinst.cpsStatsByemployee(req, res, next);
+});
 module.exports = router;
