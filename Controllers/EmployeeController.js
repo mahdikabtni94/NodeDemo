@@ -417,11 +417,17 @@ class EmployeeController extends BaseApiController {
 
     UpdateEmployee(req, res, next) {
         const where = {};
+        let loginDate;
         let imagePath = req.body.profile_image;
         where[this.getModelPrimaryKey()] = req.params.id;
         if (req.file) {
             const url = req.protocol + "://" + req.get("host");
             imagePath = JSON.parse(JSON.stringify({url: url + "/emp-images/" + req.file.filename}));
+        }
+        if (req.body.last_login_date === 'undefined') {
+            loginDate = null
+        } else {
+            loginDate = req.body.last_login_date;
         }
         db.employee.update(
             {
@@ -429,7 +435,7 @@ class EmployeeController extends BaseApiController {
                 emp_lastname: req.body.emp_lastname,
                 emp_gender: req.body.emp_gender,
                 start_working_date: req.body.start_working_date,
-                last_login_date: req.body.last_login_date,
+                last_login_date: loginDate,
                 emp_address: req.body.emp_address,
                 emp_rfid: req.body.emp_rfid,
                 profile_image: imagePath.url,

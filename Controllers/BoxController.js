@@ -1323,8 +1323,8 @@ class BoxController extends BaseApiController {
             '    cps."CartPendingOperationId",\n' +
             '    cps."UserSessionId",\n' +
             '    us."EmployeeId",\n' +
-            '    to_char(cps.end_time::date::timestamp without time zone, \'yyyymmdd\'::text) AS date_operation,\n' +
-            '    concat(to_char(cps.end_time::date::timestamp without time zone, \'yyyymmdd\'::text), to_char(cps.end_time::time without time zone::interval, \'HH24\'::text)) AS date_hour_operation,\n' +
+            '    to_char(cps.end_time::date::timestamp without time zone, \'yyyy/mm/dd\'::text) AS date_operation,\n' +
+            '    concat(to_char(cps.end_time::date::timestamp without time zone, \'yyyy/mm/dd\'::text), to_char(cps.end_time::time without time zone::interval, \'HH24\'::text)) AS date_hour_operation,\n' +
             '    cps.quantity,\n' +
             '    cps.start_time,\n' +
             '    cps.end_time,\n' +
@@ -1339,7 +1339,8 @@ class BoxController extends BaseApiController {
             '        END AS efficiency,\n' +
             '    bx.box_id,\n' +
             '    bx."LineId",\n' +
-            '    op.label AS operation_label\n' +
+            '    op.label AS operation_label,\n' +
+            '    cps.quantity::double precision / op.quantity::double precision * 100::double precision AS quantity_percentage\n' +
             '   FROM "cart_pending_sessions " cps\n' +
             '     LEFT JOIN cart_pending_operations cpo ON cpo.id = cps."CartPendingOperationId"\n' +
             '     LEFT JOIN operations op ON op.operation_id = cpo."OperationId"\n' +
